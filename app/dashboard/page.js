@@ -40,27 +40,60 @@ export default function DashboardPage() {
       .single()
 
     if (error || !data) {
-      setLoading(false)
+      // Primo accesso post-conferma email: crea company dal localStorage
+      await createCompanyFromDraft(userId)
       return
     }
 
     setCompany(data)
-
     if (data.status === 'matched') {
       await loadMatches(data.id)
     }
-
     setLoading(false)
+    setupRealtime(data, userId)
+  }
 
-    // Realtime subscription for status changes
-    if (data.status === 'pending' || data.status === 'matching') {
+  const createCompanyFromDraft = async (userId) => {
+    let draft = null
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('augiva_company_draft')
+        if (raw) draft = JSON.parse(raw)
+      } catch {}
+    }
+
+    const newCompany = {
+      user_id: userId,
+      piva: draft?.piva || null,
+      ragione_sociale: draft?.ragione_sociale || null,
+      forma_giuridica: draft?.forma_giuridica || null,
+      ateco: draft?.ateco || null,
+      ateco_desc: draft?.ateco_desc || null,
+      pec: draft?.pec || null,
+      regione: draft?.regione || null,
+      settori: draft?.settori || [],
+      status: 'pending',
+      trial_ends_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+    }
+
+    const { data, error } = await supabase.from('companies').insert(newCompany).select().single()
+    if (!error && data) {
+      if (typeof window !== 'undefined') localStorage.removeItem('augiva_company_draft')
+      setCompany(data)
+      setupRealtime(data, userId)
+    }
+    setLoading(false)
+  }
+
+  const setupRealtime = (comp, userId) => {
+    if (comp.status === 'pending' || comp.status === 'matching') {
       const channel = supabase
-        .channel(`company-${data.id}`)
+        .channel(`company-${comp.id}`)
         .on('postgres_changes', {
           event: 'UPDATE',
           schema: 'public',
           table: 'companies',
-          filter: `id=eq.${data.id}`,
+          filter: `id=eq.${comp.id}`,
         }, async (payload) => {
           const updated = payload.new
           setCompany(updated)
@@ -74,15 +107,14 @@ export default function DashboardPage() {
   }
 
   const loadMatches = async (companyId) => {
-    // Load appalti matches
-    const { data: appaltiData } = await supabase
+    const { data: matchData } = await supabase
       .from('matches')
       .select('*, tenders(*)')
       .eq('company_id', companyId)
       .order('score', { ascending: false })
 
-    if (appaltiData) {
-      const mapped = appaltiData
+    if (matchData) {
+      const mapped = matchData
         .filter(m => m.tenders)
         .map(m => ({
           id: m.id,
@@ -94,7 +126,6 @@ export default function DashboardPage() {
           tipo: m.tenders.tipo || m.tenders.type,
           link: m.tenders.link || m.tenders.url,
         }))
-
       setAppalti(mapped.filter(m => m.tipo === 'appalto'))
       setFondi(mapped.filter(m => m.tipo === 'fondo'))
     }
@@ -107,111 +138,54 @@ export default function DashboardPage() {
 
   if (!authChecked || loading) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F5F5F7' }}>
-        <div style={{
-          width: '40px', height: '40px',
-          border: '3px solid #E5E5EA',
-          borderTopColor: '#2563EB',
-          borderRadius: '50%',
-          animation: 'spin 0.8s linear infinite',
-        }} />
+      <div className="loading-container" style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+        <div className="spinner" />
+        <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Caricamento...</p>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     )
   }
 
-  if (!company) {
-    return (
-      <div style={{ minHeight: '100vh', background: '#F5F5F7', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ fontSize: '20px', fontWeight: '600', color: '#1D1D1F', marginBottom: '8px' }}>
-            Nessuna azienda configurata
-          </p>
-          <p style={{ color: '#6E6E73', marginBottom: '24px' }}>Completa l'onboarding per vedere i tuoi match.</p>
-          <Link
-            href="/onboarding"
-            style={{
-              padding: '14px 28px',
-              background: '#2563EB',
-              color: 'white',
-              borderRadius: '12px',
-              fontWeight: '600',
-              textDecoration: 'none',
-            }}
-          >
-            Vai all'onboarding →
-          </Link>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div style={{ minHeight: '100vh', background: '#F5F5F7' }}>
+    <div className="dashboard-container">
       {/* Header */}
-      <nav style={{
-        background: 'rgba(255,255,255,0.9)',
-        backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(0,0,0,0.06)',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-        padding: '0 24px',
-      }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '64px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '32px', height: '32px', background: '#2563EB', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'white', fontSize: '16px', fontWeight: '800' }}>A</span>
-            </div>
-            <div>
-              <span style={{ fontSize: '16px', fontWeight: '700', color: '#1D1D1F' }}>
-                {company.ragione_sociale || 'La tua azienda'}
-              </span>
-            </div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{
-              fontSize: '12px',
-              fontWeight: '600',
-              color: '#FF9F0A',
-              background: '#FFF8EC',
-              border: '1px solid #FF9F0A',
-              padding: '4px 10px',
-              borderRadius: '20px',
-            }}>
-              ✦ Prova gratuita
-            </span>
-            <button
-              onClick={handleLogout}
-              style={{
-                fontSize: '14px',
-                color: '#6E6E73',
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '8px 12px',
-              }}
-            >
-              Esci
-            </button>
-          </div>
+      <nav className="dashboard-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div className="auth-logo-mark">A</div>
+          <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
+            {company?.ragione_sociale || 'Augiva'}
+          </span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{
+            fontSize: 12, fontWeight: 600, color: 'var(--yellow)',
+            background: 'rgba(255,159,10,0.15)', border: '1px solid rgba(255,159,10,0.3)',
+            padding: '4px 10px', borderRadius: 20,
+          }}>
+            ✦ Prova gratuita
+          </span>
+          <button onClick={handleLogout} style={{
+            fontSize: 14, color: 'var(--text-secondary)', background: 'transparent',
+            border: 'none', cursor: 'pointer', padding: '8px 12px', fontFamily: 'inherit',
+          }}>
+            Esci
+          </button>
         </div>
       </nav>
 
       {/* Content */}
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '40px 24px' }}>
-        {(company.status === 'pending' || company.status === 'matching') ? (
+      <div className="dashboard-content">
+        {(!company || company.status === 'pending' || company.status === 'matching') ? (
           <div>
-            <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#1D1D1F', marginBottom: '8px' }}>
+            <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
               Analisi in corso...
             </h1>
-            <p style={{ color: '#6E6E73', marginBottom: '40px' }}>
-              Stiamo analizzando {company.ragione_sociale} e trovando le migliori opportunità.
+            <p style={{ color: 'var(--text-secondary)', marginBottom: 40 }}>
+              Stiamo analizzando{company?.ragione_sociale ? ` ${company.ragione_sociale}` : ' la tua azienda'} e trovando le migliori opportunità.
             </p>
             <div style={{
-              background: 'white',
-              borderRadius: '20px',
-              boxShadow: '0 2px 20px rgba(0,0,0,0.06)',
+              background: 'var(--bg-card)', borderRadius: 20,
+              border: '1px solid var(--border)', boxShadow: 'var(--shadow-card)',
             }}>
               <LoadingMatcher />
             </div>
@@ -219,99 +193,78 @@ export default function DashboardPage() {
         ) : (
           <>
             {/* Welcome */}
-            <div style={{ marginBottom: '40px' }}>
-              <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#1D1D1F', marginBottom: '8px' }}>
+            <div style={{ marginBottom: 40 }}>
+              <h1 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
                 Le tue opportunità 🎯
               </h1>
-              <p style={{ color: '#6E6E73' }}>
-                Ecco i migliori match per <strong>{company.ragione_sociale}</strong> — aggiornati in tempo reale.
+              <p style={{ color: 'var(--text-secondary)' }}>
+                Ecco i migliori match per <strong style={{ color: 'var(--text-primary)' }}>{company.ragione_sociale}</strong> — aggiornati in tempo reale.
               </p>
             </div>
 
             {/* Summary bar */}
             <div style={{
-              background: 'white',
-              borderRadius: '16px',
-              padding: '20px 28px',
-              boxShadow: '0 2px 20px rgba(0,0,0,0.06)',
-              marginBottom: '36px',
-              display: 'flex',
-              gap: '32px',
-              flexWrap: 'wrap',
+              background: 'var(--bg-card)', borderRadius: 16, padding: '20px 28px',
+              border: '1px solid var(--border)', marginBottom: 36,
+              display: 'flex', gap: 32, flexWrap: 'wrap',
             }}>
               <div>
-                <p style={{ fontSize: '24px', fontWeight: '800', color: '#2563EB' }}>{appalti.length}</p>
-                <p style={{ fontSize: '13px', color: '#6E6E73' }}>Gare d'appalto</p>
+                <p style={{ fontSize: 24, fontWeight: 800, color: 'var(--accent)' }}>{appalti.length}</p>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Gare d&apos;appalto</p>
               </div>
               <div>
-                <p style={{ fontSize: '24px', fontWeight: '800', color: '#34C759' }}>{fondi.length}</p>
-                <p style={{ fontSize: '13px', color: '#6E6E73' }}>Fondi e agevolazioni</p>
+                <p style={{ fontSize: 24, fontWeight: 800, color: 'var(--green)' }}>{fondi.length}</p>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Fondi e agevolazioni</p>
               </div>
               {company.ateco && (
                 <div>
-                  <p style={{ fontSize: '15px', fontWeight: '700', color: '#1D1D1F' }}>{company.ateco}</p>
-                  <p style={{ fontSize: '13px', color: '#6E6E73' }}>Codice ATECO</p>
+                  <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>{company.ateco}</p>
+                  <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Codice ATECO</p>
                 </div>
               )}
             </div>
 
-            {/* Appalti section */}
+            {/* Gare d'appalto */}
             {appalti.length > 0 && (
-              <div style={{ marginBottom: '48px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                  <span style={{ fontSize: '22px' }}>📋</span>
-                  <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#1D1D1F' }}>Gare d'appalto</h2>
+              <div style={{ marginBottom: 48 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                  <span style={{ fontSize: 22 }}>📋</span>
+                  <h2 className="section-title" style={{ marginBottom: 0 }}>Gare d&apos;appalto</h2>
                   <span style={{
-                    background: '#EEF4FF',
-                    color: '#2563EB',
-                    padding: '3px 10px',
-                    borderRadius: '20px',
-                    fontSize: '13px',
-                    fontWeight: '600',
+                    background: 'rgba(37,99,235,0.15)', color: 'var(--accent)',
+                    padding: '3px 10px', borderRadius: 20, fontSize: 13, fontWeight: 600,
                   }}>
                     {appalti.length} match
                   </span>
                 </div>
-                <div className="grid-cards">
-                  {appalti.map(tender => (
-                    <TenderCard key={tender.id} tender={tender} />
-                  ))}
-                </div>
+                {appalti.map(tender => <TenderCard key={tender.id} tender={tender} />)}
               </div>
             )}
 
-            {/* Fondi section */}
+            {/* Fondi e agevolazioni */}
             {fondi.length > 0 && (
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
-                  <span style={{ fontSize: '22px' }}>💰</span>
-                  <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#1D1D1F' }}>Fondi e agevolazioni</h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+                  <span style={{ fontSize: 22 }}>💰</span>
+                  <h2 className="section-title" style={{ marginBottom: 0 }}>Fondi e agevolazioni</h2>
                   <span style={{
-                    background: '#EEF4FF',
-                    color: '#2563EB',
-                    padding: '3px 10px',
-                    borderRadius: '20px',
-                    fontSize: '13px',
-                    fontWeight: '600',
+                    background: 'rgba(37,99,235,0.15)', color: 'var(--accent)',
+                    padding: '3px 10px', borderRadius: 20, fontSize: 13, fontWeight: 600,
                   }}>
                     {fondi.length} match
                   </span>
                 </div>
-                <div className="grid-cards">
-                  {fondi.map(tender => (
-                    <TenderCard key={tender.id} tender={tender} />
-                  ))}
-                </div>
+                {fondi.map(tender => <TenderCard key={tender.id} tender={tender} />)}
               </div>
             )}
 
             {appalti.length === 0 && fondi.length === 0 && (
               <div style={{ textAlign: 'center', padding: '80px 24px' }}>
-                <p style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</p>
-                <p style={{ fontSize: '20px', fontWeight: '600', color: '#1D1D1F', marginBottom: '8px' }}>
+                <p style={{ fontSize: 48, marginBottom: 16 }}>🔍</p>
+                <p style={{ fontSize: 20, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 8 }}>
                   Nessun risultato ancora
                 </p>
-                <p style={{ color: '#6E6E73' }}>
+                <p style={{ color: 'var(--text-secondary)' }}>
                   Il matching è ancora in corso o non sono stati trovati match. Riprova tra poco.
                 </p>
               </div>
