@@ -2,13 +2,16 @@
 Augiva Matching Engine — il cuore del prodotto.
 
 Livello 1: Keyword/Rule-based matching
-Livello 2: Semantic matching via OpenAI embeddings (se API key disponibile)
+Livello 2: Semantic matching via OpenAI embeddings + pgvector
 """
 
 import os
 import re
 import sys
 import logging
+import asyncio
+import psycopg2
+import psycopg2.extras
 from typing import Optional
 from datetime import datetime
 
@@ -36,13 +39,25 @@ def _load_env():
 _load_env()
 
 
+def _get_db_conn():
+    """Connessione psycopg2 diretta a Supabase per pgvector."""
+    return psycopg2.connect(
+        host='db.izwpthubencimzsgervo.supabase.co',
+        port=5432,
+        dbname='postgres',
+        user='postgres',
+        password=os.environ.get('DB_PASSWORD', 'B7M8pzc6xIqo3ZxK'),
+        sslmode='require'
+    )
+
+
 class MatchingEngine:
     """
     Motore di matching bandi–aziende.
 
     Calcola un punteggio 0-100 di compatibilità tra un'azienda e un bando.
-    Combina regole keyword-based (sempre attive) con semantic embedding
-    (solo se OPENAI_API_KEY è disponibile).
+    Combina regole keyword-based (L1, sempre attive) con semantic embedding
+    pgvector (L2, solo se OPENAI_API_KEY è disponibile).
     """
 
     # Pesi per il calcolo dello score finale (livello 1)
@@ -89,43 +104,31 @@ class MatchingEngine:
     # ─────────────────────────────────────────────
 
     def _score_cpv(self, company: dict, tender: dict) -> float:
-        """
-        Confronta ATECO aziendale con CPV codes del bando.
-        Se CPV codes sono vuoti, tenta di inferire dalla categoria nel titolo.
-        Restituisce 0.0–1.0
-        """
         ateco = str(company.get('ateco', '') or '').strip()
         if not ateco:
             return 0.0
 
-        # Prefissi ATECO da più specifico a meno specifico
         ateco_prefixes = []
         parts = ateco.split('.')
         current = ''
-        for i, part in enumerate(parts):
+        for part in parts:
             current = (current + '.' + part) if current else part
             ateco_prefixes.append(current)
-        ateco_prefixes.reverse()  # più specifico prima
+        ateco_prefixes.reverse()
 
-        # CPV codes del bando
         cpv_codes = tender.get('cpv_codes') or []
-
-        # Se non ci sono CPV, prova a inferire dalla categoria nel titolo
-        inferred_cpvs = []
         title = str(tender.get('title', '') or '').lower()
+        inferred_cpvs = []
         if not cpv_codes:
             inferred_cpvs = self._infer_cpv_from_title(title)
 
         all_cpvs = list(cpv_codes) + inferred_cpvs
-
-        if not all_cpvs and not inferred_cpvs:
+        if not all_cpvs:
             return 0.0
 
-        # Cerca match CPV
         best_score = 0.0
         for ateco_prefix in ateco_prefixes:
             mapped_cpvs = ATECO_TO_CPV.get(ateco_prefix, [])
-            # Cerca anche prefissi parziali (es. "41" matcha "41.20")
             if not mapped_cpvs:
                 for key in ATECO_TO_CPV:
                     if ateco_prefix.startswith(key) or key.startswith(ateco_prefix.split('.')[0]):
@@ -139,7 +142,6 @@ class MatchingEngine:
                     if cpv_str.startswith(mapped_clean[:2]) or mapped_clean.startswith(cpv_str[:2]):
                         best_score = max(best_score, 1.0)
                         break
-                    # Match parziale
                     common = len(os.path.commonprefix([cpv_str[:4], mapped_clean[:4]]))
                     if common >= 1:
                         best_score = max(best_score, common / 4.0 * 0.7)
@@ -147,11 +149,6 @@ class MatchingEngine:
         return min(best_score, 1.0)
 
     def _infer_cpv_from_title(self, title_lower: str) -> list:
-        """
-        Inferisce CPV approssimativi dalla categoria nel titolo TED.
-        I bandi TED hanno formato: "Italia – [Categoria] – [Titolo]"
-        """
-        # Mappa categoria → CPV prefix approssimativo
         category_cpv_map = {
             "servizi architettonici": ["71"],
             "servizi di ingegneria": ["71"],
@@ -187,19 +184,13 @@ class MatchingEngine:
             "servizi di assistenza sociale": ["85.3"],
             "servizi di manutenzione": ["50"],
         }
-
         inferred = []
         for cat_key, cpvs in category_cpv_map.items():
             if cat_key in title_lower:
                 inferred.extend(cpvs)
-
         return inferred
 
     def _score_keywords(self, company: dict, tender: dict) -> float:
-        """
-        Confronta settori aziendali con testo del bando via keyword matching.
-        Restituisce 0.0–1.0
-        """
         settori = company.get('settori') or []
         if isinstance(settori, str):
             settori = [s.strip() for s in settori.split(',')]
@@ -217,7 +208,6 @@ class MatchingEngine:
         for settore in settori:
             settore_lower = settore.lower().strip()
             keywords = SECTOR_KEYWORDS.get(settore_lower, [settore_lower])
-
             for kw in keywords:
                 if kw.lower() in full_text:
                     match_count += 1
@@ -229,7 +219,6 @@ class MatchingEngine:
 
         base_score = match_count / total_weight
 
-        # Bonus se il settore compare direttamente nel titolo
         for settore in settori:
             if settore.lower() in title:
                 base_score = min(base_score + 0.2, 1.0)
@@ -238,52 +227,33 @@ class MatchingEngine:
         return min(base_score, 1.0)
 
     def _score_geo(self, company: dict, tender: dict) -> float:
-        """
-        Controlla compatibilità geografica.
-        Se il bando è nazionale → score pieno.
-        Se il bando è regionale → controlla se l'azienda è nella regione.
-        Restituisce 0.0–1.0
-        """
         tender_region = tender.get('region')
         company_regione = str(company.get('regione', '') or '').strip()
         company_provincia = str(company.get('provincia', '') or '').strip()
 
-        # Bando senza region = nazionale → ok per tutti
         if not tender_region:
             return 1.0
 
-        # Controlla match diretto regione
         if company_regione and company_regione.lower() in str(tender_region).lower():
             return 1.0
 
-        # Controlla via provincia
         if company_provincia:
             allowed_provinces = REGIONE_TO_PROVINCE.get(company_regione, [])
             if any(p.lower() in str(tender_region).lower() for p in allowed_provinces):
                 return 0.8
 
-        # Controlla se il titolo menziona la regione/provincia
         title = str(tender.get('title', '') or '').lower()
         if company_regione and company_regione.lower() in title:
             return 0.9
         if company_provincia and company_provincia.lower() in title:
             return 0.85
 
-        # Bando regionale ma azienda fuori regione → penalità
         return 0.3
 
     def _score_value(self, company: dict, tender: dict) -> float:
-        """
-        Filtra bandi per valore:
-        - Troppo piccolo (<5K) → score basso
-        - Troppo grande (>10x fatturato) → score penalizzato
-        - Nella fascia giusta → score pieno
-        Restituisce 0.0–1.0
-        """
         value = tender.get('estimated_value')
         fatturato = company.get('fatturato')
 
-        # Valore non disponibile → neutro (non penalizzare)
         if value is None:
             return 0.7
 
@@ -292,11 +262,9 @@ class MatchingEngine:
         except (TypeError, ValueError):
             return 0.7
 
-        # Troppo piccolo
         if value < self.MIN_VALUE_EUR:
             return 0.1
 
-        # Senza fatturato → non possiamo filtrare per dimensione
         if not fatturato:
             return 0.8
 
@@ -311,13 +279,13 @@ class MatchingEngine:
         ratio = value / fatturato
 
         if ratio > 10:
-            return 0.2   # Bando troppo grande
+            return 0.2
         elif ratio > 5:
-            return 0.6   # Bando grande ma possibile
+            return 0.6
         elif ratio < 0.01:
-            return 0.4   # Bando minuscolo
+            return 0.4
         else:
-            return 1.0   # Nella fascia ideale
+            return 1.0
 
     def score_tender_l1(self, company: dict, tender: dict) -> dict:
         """
@@ -347,8 +315,26 @@ class MatchingEngine:
         }
 
     # ─────────────────────────────────────────────
-    # LIVELLO 2: Semantic (OpenAI Embeddings)
+    # LIVELLO 2: Semantic via OpenAI + pgvector
     # ─────────────────────────────────────────────
+
+    def _build_company_profile_text(self, company: dict) -> str:
+        """
+        Costruisce testo descrittivo dell'azienda per embedding L2.
+        Formato: "{ragione_sociale} {ateco_desc} {settori_joined} {regione}"
+        """
+        settori = company.get('settori') or []
+        if isinstance(settori, str):
+            settori = [s.strip() for s in settori.split(',')]
+        settori_joined = ' '.join(settori)
+
+        parts = [
+            company.get('ragione_sociale', ''),
+            company.get('ateco_desc', ''),
+            settori_joined,
+            company.get('regione', ''),
+        ]
+        return ' '.join(p for p in parts if p).strip()
 
     def _get_embedding(self, text: str) -> Optional[list]:
         """Ottieni embedding OpenAI con cache."""
@@ -359,7 +345,7 @@ class MatchingEngine:
         try:
             resp = self._openai_client.embeddings.create(
                 model='text-embedding-3-small',
-                input=text[:8000]  # limite sicuro
+                input=text[:8000]
             )
             emb = resp.data[0].embedding
             self._embedding_cache[text] = emb
@@ -368,193 +354,209 @@ class MatchingEngine:
             logger.error(f"Errore embedding: {e}")
             return None
 
-    def _cosine_similarity(self, v1: list, v2: list) -> float:
-        """Cosine similarity tra due vettori."""
-        import math
-        dot = sum(a * b for a, b in zip(v1, v2))
-        norm1 = math.sqrt(sum(a ** 2 for a in v1))
-        norm2 = math.sqrt(sum(b ** 2 for b in v2))
-        if norm1 == 0 or norm2 == 0:
-            return 0.0
-        return dot / (norm1 * norm2)
-
-    def _build_company_text(self, company: dict) -> str:
-        parts = [
-            company.get('ragione_sociale', ''),
-            company.get('ateco_desc', ''),
-            company.get('ateco', ''),
-            ' '.join(company.get('settori', []) if isinstance(company.get('settori'), list)
-                     else [str(company.get('settori', ''))]),
-            company.get('descrizione', ''),
-        ]
-        return ' '.join(p for p in parts if p).strip()
-
-    def _build_tender_text(self, tender: dict) -> str:
-        parts = [
-            tender.get('title', ''),
-            tender.get('description', ''),
-        ]
-        return ' '.join(p for p in parts if p).strip()
-
-    def score_tender_l2(self, company: dict, tender: dict) -> Optional[float]:
+    def score_tender_l2_pgvector(self, company: dict, top_k: int = 20) -> list:
         """
-        Livello 2: calcola score semantico via OpenAI embeddings.
-        Restituisce score 0-100 o None se OpenAI non disponibile.
+        Livello 2 — pgvector native query.
+
+        Genera embedding del profilo aziendale, poi query pgvector su Supabase
+        per ottenere i top-k bandi semanticamente più simili.
+
+        Returns:
+            Lista di dict: {id, title, similarity (0-1), score_l2 (0-100)}
         """
         if not self._openai_available:
-            return None
+            logger.warning("OpenAI non disponibile — L2 pgvector disabilitato")
+            return []
 
-        company_text = self._build_company_text(company)
-        tender_text = self._build_tender_text(tender)
+        company_text = self._build_company_profile_text(company)
+        if not company_text:
+            return []
 
-        if not company_text or not tender_text:
-            return None
+        company_vec = self._get_embedding(company_text)
+        if company_vec is None:
+            return []
 
-        emb_company = self._get_embedding(company_text)
-        emb_tender = self._get_embedding(tender_text)
+        # Formatta il vettore come stringa pgvector: [0.1, 0.2, ...]
+        vec_str = '[' + ','.join(str(x) for x in company_vec) + ']'
 
-        if emb_company is None or emb_tender is None:
-            return None
+        try:
+            conn = _get_db_conn()
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-        sim = self._cosine_similarity(emb_company, emb_tender)
-        # Cosine similarity [-1, 1] → [0, 100]
-        score = (sim + 1) / 2 * 100
-        return round(score, 2)
+            query = """
+                SELECT
+                    id,
+                    title,
+                    description,
+                    cpv_codes,
+                    region,
+                    estimated_value,
+                    1 - (embedding <=> %s::vector) AS similarity
+                FROM tenders
+                WHERE embedding IS NOT NULL
+                ORDER BY similarity DESC
+                LIMIT %s
+            """
+            cur.execute(query, (vec_str, top_k))
+            rows = cur.fetchall()
+            conn.close()
+
+            results = []
+            for row in rows:
+                sim = float(row['similarity'])
+                # Cosine similarity [−1, 1] → score [0, 100]
+                score_l2 = round((sim + 1) / 2 * 100, 2)
+                results.append({
+                    'id': row['id'],
+                    'title': row['title'],
+                    'description': row.get('description'),
+                    'cpv_codes': row.get('cpv_codes'),
+                    'region': row.get('region'),
+                    'estimated_value': row.get('estimated_value'),
+                    'similarity': round(sim, 4),
+                    'score_l2': score_l2,
+                })
+
+            return results
+
+        except Exception as e:
+            logger.error(f"Errore pgvector query: {e}")
+            return []
 
     # ─────────────────────────────────────────────
-    # Score finale (combina L1 + L2)
+    # Score finale combinato (L1 + L2)
     # ─────────────────────────────────────────────
 
-    def score_tender(self, company: dict, tender: dict) -> float:
+    def score_tender(self, company: dict, tender: dict,
+                     semantic_score: Optional[float] = None) -> float:
         """
-        Calcola score finale di compatibilità tra azienda e bando.
-        Combina L1 (sempre) e L2 (se OpenAI disponibile).
-        Restituisce float 0-100.
+        Calcola score finale combinando L1 (rule-based) e L2 (semantico).
+
+        Pesi: 40% L1 + 60% L2 (se semantic_score fornito)
+        Se semantic_score è None: usa solo L1.
+
+        Args:
+            company: dict azienda
+            tender: dict bando
+            semantic_score: score L2 (0-100), se già calcolato via pgvector
+
+        Returns:
+            float 0-100
         """
         result_l1 = self.score_tender_l1(company, tender)
-        score_l1 = result_l1['score']
+        l1 = result_l1['score']
 
-        score_l2 = self.score_tender_l2(company, tender)
+        if semantic_score is not None:
+            return round(l1 * 0.4 + semantic_score * 0.6, 1)
+        return l1
 
-        if score_l2 is not None:
-            # Combina: 60% semantico + 40% rule-based
-            final = score_l2 * 0.6 + score_l1 * 0.4
-        else:
-            final = score_l1
-
-        return round(final, 2)
-
-    def score_tender_full(self, company: dict, tender: dict) -> dict:
+    def score_tender_full(self, company: dict, tender: dict,
+                          semantic_score: Optional[float] = None) -> dict:
         """
         Score completo con dettaglio componenti.
         """
         result_l1 = self.score_tender_l1(company, tender)
-        score_l2 = self.score_tender_l2(company, tender)
+        l1 = result_l1['score']
 
-        if score_l2 is not None:
-            final = score_l2 * 0.6 + result_l1['score'] * 0.4
+        if semantic_score is not None:
+            final = round(l1 * 0.4 + semantic_score * 0.6, 1)
         else:
-            final = result_l1['score']
+            final = l1
 
         return {
-            'score': round(final, 2),
-            'score_l1': result_l1['score'],
-            'score_l2': score_l2,
+            'score': final,
+            'score_l1': l1,
+            'score_l2': semantic_score,
             'components_l1': result_l1['components'],
             'tender_id': tender.get('id'),
             'tender_title': tender.get('title', '')[:100],
         }
 
     # ─────────────────────────────────────────────
-    # Match tutti i bandi per un'azienda
+    # match_all() — L1 + L2 combinato via pgvector
     # ─────────────────────────────────────────────
 
-    def match_all(self, company_id: str = None, company: dict = None,
-                  min_score: float = 10.0, limit: int = 100) -> list:
+    async def match_all(self, company: dict) -> list:
         """
-        Matcha tutti i bandi nel DB per un'azienda.
+        Matcha un'azienda contro tutti i bandi usando L1 + L2 pgvector.
 
-        Args:
-            company_id: ID azienda nel DB (usa questo OPPURE company)
-            company: dict azienda (usa questo se non hai company_id)
-            min_score: score minimo per includere il risultato
-            limit: numero massimo di bandi da considerare
+        Steps:
+          1. Genera embedding profilo aziendale
+          2. Query pgvector → top-20 semantici
+          3. Per ognuno: calcola score combinato L1 + L2
+          4. Filtra: score finale >= 60
+          5. Ritorna lista ordinata per score desc
 
         Returns:
-            Lista di dict ordinati per score decrescente
+            Lista di dict con score dettagliato, ordinata per score desc
         """
-        sb = self._get_supabase()
+        logger.info(f"match_all() per {company.get('ragione_sociale', 'N/A')}")
 
-        # Carica azienda dal DB se serve
-        if company is None and company_id:
-            res = sb.table('companies').select('*').eq('id', company_id).single().execute()
-            company = res.data
-            if not company:
-                raise ValueError(f"Azienda {company_id} non trovata")
+        # Step 1 + 2: embedding + pgvector top-20
+        semantic_results = self.score_tender_l2_pgvector(company, top_k=20)
 
-        if company is None:
-            raise ValueError("company_id o company dict richiesto")
-
-        # Carica tutti i bandi
-        res = sb.table('tenders').select('*').limit(limit).execute()
-        tenders = res.data or []
-
-        logger.info(f"Matching {company.get('ragione_sociale', 'N/A')} vs {len(tenders)} bandi...")
-
-        results = []
-        for tender in tenders:
-            try:
+        if not semantic_results:
+            logger.warning("Nessun risultato semantico — fallback L1 su tutti i bandi")
+            # Fallback: carica tutti i bandi e usa solo L1
+            sb = self._get_supabase()
+            res = sb.table('tenders').select('*').execute()
+            tenders = res.data or []
+            results = []
+            for tender in tenders:
                 full = self.score_tender_full(company, tender)
-                if full['score'] >= min_score:
+                if full['score'] >= 60:
                     results.append(full)
-            except Exception as e:
-                logger.warning(f"Errore su bando {tender.get('id')}: {e}")
+            results.sort(key=lambda x: x['score'], reverse=True)
+            return results
 
+        # Step 3: calcola score combinato L1+L2 per ogni risultato semantico
+        results = []
+        for sem in semantic_results:
+            tender = {
+                'id': sem['id'],
+                'title': sem['title'],
+                'description': sem.get('description'),
+                'cpv_codes': sem.get('cpv_codes'),
+                'region': sem.get('region'),
+                'estimated_value': sem.get('estimated_value'),
+            }
+            score_l2 = sem['score_l2']
+            full = self.score_tender_full(company, tender, semantic_score=score_l2)
+            full['similarity'] = sem['similarity']
+            results.append(full)
+
+        # Step 4: filtra score >= 60
+        results = [r for r in results if r['score'] >= 60]
+
+        # Step 5: ordina per score desc
         results.sort(key=lambda x: x['score'], reverse=True)
         return results
 
-    # ─────────────────────────────────────────────
-    # Salva match nel DB
-    # ─────────────────────────────────────────────
-
-    def _save_match(self, company_id: str, tender_id: str, score: float,
-                    details: dict) -> None:
-        """Salva o aggiorna un match nel DB."""
-        try:
-            sb = self._get_supabase()
-            sb.table('matches').upsert({
-                'company_id': company_id,
-                'tender_id': tender_id,
-                'score': score,
-                'details': details,
-                'updated_at': datetime.utcnow().isoformat(),
-            }, on_conflict='company_id,tender_id').execute()
-        except Exception as e:
-            logger.error(f"Errore salvataggio match: {e}")
+    def match_all_sync(self, company: dict) -> list:
+        """Versione sincrona di match_all()."""
+        return asyncio.run(self.match_all(company))
 
     # ─────────────────────────────────────────────
-    # Batch matching: tutte le aziende nel DB
+    # run_batch_matching() — tutte le aziende
     # ─────────────────────────────────────────────
 
-    def run_batch_matching(self, min_score: float = 15.0,
+    def run_batch_matching(self, min_score: float = 60.0,
                            save_to_db: bool = True) -> dict:
         """
-        Processa tutte le aziende nel DB e salva i match.
+        Processa tutte le aziende nel DB con match_all() e salva i risultati.
+
+        Salva in tabella `matches` (company_id, tender_id, score)
+        con ON CONFLICT DO UPDATE.
 
         Returns:
             dict con statistiche del batch
         """
         sb = self._get_supabase()
 
-        # Carica aziende
         res = sb.table('companies').select('*').execute()
         companies = res.data or []
 
-        # Carica bandi
-        res = sb.table('tenders').select('*').execute()
-        tenders = res.data or []
-
-        logger.info(f"Batch matching: {len(companies)} aziende × {len(tenders)} bandi")
+        logger.info(f"Batch matching: {len(companies)} aziende con L1+L2 pgvector")
 
         stats = {
             'companies_processed': 0,
@@ -566,27 +568,21 @@ class MatchingEngine:
         for company in companies:
             try:
                 company_id = company.get('id')
-                results = []
+                results = asyncio.run(self.match_all(company))
 
-                for tender in tenders:
-                    try:
-                        full = self.score_tender_full(company, tender)
-                        if full['score'] >= min_score:
-                            results.append(full)
-                            if save_to_db and company_id:
-                                self._save_match(
-                                    company_id=company_id,
-                                    tender_id=tender['id'],
-                                    score=full['score'],
-                                    details=full
-                                )
-                    except Exception as e:
-                        logger.warning(f"Errore bando {tender.get('id')}: {e}")
-                        stats['errors'] += 1
+                if save_to_db and company_id:
+                    for match in results:
+                        if match['score'] >= min_score:
+                            self._save_match(
+                                company_id=company_id,
+                                tender_id=match['tender_id'],
+                                score=match['score'],
+                                details=match
+                            )
 
                 stats['companies_processed'] += 1
                 stats['total_matches'] += len(results)
-                logger.info(f"  {company.get('ragione_sociale')}: {len(results)} match")
+                logger.info(f"  {company.get('ragione_sociale')}: {len(results)} match ≥{min_score}")
 
             except Exception as e:
                 logger.error(f"Errore azienda {company.get('id')}: {e}")
@@ -595,3 +591,18 @@ class MatchingEngine:
         stats['completed_at'] = datetime.utcnow().isoformat()
         logger.info(f"Batch completato: {stats}")
         return stats
+
+    def _save_match(self, company_id: str, tender_id: str, score: float,
+                    details: dict) -> None:
+        """Salva o aggiorna un match nel DB (ON CONFLICT DO UPDATE)."""
+        try:
+            sb = self._get_supabase()
+            sb.table('matches').upsert({
+                'company_id': company_id,
+                'tender_id': tender_id,
+                'score': score,
+                'details': details,
+                'updated_at': datetime.utcnow().isoformat(),
+            }, on_conflict='company_id,tender_id').execute()
+        except Exception as e:
+            logger.error(f"Errore salvataggio match: {e}")
