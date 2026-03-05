@@ -76,7 +76,7 @@ export default function RegisterPage() {
             Crea il tuo account
           </h1>
           <p style={{ fontSize: '15px', color: '#6E6E73', marginBottom: '32px' }}>
-            Inizia la prova gratuita — nessuna carta di credito
+            Inizia la prova gratuita — 15 giorni senza addebiti
           </p>
 
           {success ? (
