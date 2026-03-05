@@ -34,7 +34,7 @@ Provider: OpenAPI.com (gratis primi 30/mese, poi €0.04/chiamata una tantum per
 - Deduplicazione 3 livelli: CIG → hash contenuto → similarità embedding
 
 ### Pricing definitivo
-- Mese 1-3 lancio: piano unico €149/mese + pre-compilazione €9/doc
+- Pricing definitivo: Starter €97/mese (€77 annuale), Professional €197/mese (€157 annuale), pre-compilazione €29/doc (solo Starter)
 - Mese 4+: Piano Essenziale €149/mese + Piano Professionale €449/mese
 - Codici promo via Stripe (es. VEDILIA30 = 30 giorni gratis)
 - Nessuna beta gratuita — prodotto completo dal day one
