@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Augiva — Font</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500&family=Lato:wght@300;400&family=Nunito:wght@200;300;400&family=Poppins:wght@200;300;400&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #32323C;
+  -webkit-font-smoothing: antialiased;
+  padding: 50px 40px;
+  font-size: 16px;
+}
+
+/* VERIFICA CARICAMENTO FONT */
+.font-check {
+  text-align: center;
+  color: #52525B;
+  font-size: 11px;
+  letter-spacing: 2px;
+  margin-bottom: 50px;
+  font-family: sans-serif;
+}
+.font-check span { 
+  display: inline-block; 
+  margin: 0 12px; 
+  padding: 4px 10px; 
+  border: 1px solid #3B3B45; 
+  border-radius: 4px; 
+}
+.f-qs { font-family: 'Quicksand', sans-serif !important; }
+.f-lt { font-family: 'Lato', sans-serif !important; }
+.f-nu { font-family: 'Nunito', sans-serif !important; }
+.f-pp { font-family: 'Poppins', sans-serif !important; }
+
+.icon {
+  width: 56px; height: 56px;
+  background: #2563EB;
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.icon-sm {
+  width: 30px; height: 30px;
+  background: #2563EB;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.card {
+  background: #2C2C36;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 44px 50px;
+  margin-bottom: 12px;
+}
+
+.tag {
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #4A4A55;
+  margin-bottom: 24px;
+  display: block;
+}
+
+.brand { display: flex; align-items: center; gap: 18px; }
+.wm { font-size: 52px; line-height: 1; color: #F4F4F5; }
+
+.sep { height: 1px; background: rgba(255,255,255,0.06); margin: 24px 0; }
+
+.nav { display: flex; align-items: center; justify-content: space-between; }
+.nav-logo { display: flex; align-items: center; gap: 10px; }
+.nav-wm { font-size: 17px; color: #F4F4F5; }
+.nav-links { display: flex; gap: 24px; }
+.nav-link { font-family: 'Lato', sans-serif; font-size: 13px; color: #71717A; font-weight: 300; }
+.nav-cta {
+  font-family: 'Lato', sans-serif;
+  font-size: 13px; font-weight: 400;
+  background: #F4F4F5; color: #1D1D1F;
+  padding: 8px 16px; border-radius: 8px;
+}
+</style>
+</head>
+<body>
+
+<!-- check che i font siano caricati -->
+<div class="font-check">
+  Verifica font: 
+  <span class="f-qs">Quicksand</span>
+  <span class="f-lt">Lato</span>
+  <span class="f-nu">Nunito</span>
+  <span class="f-pp">Poppins</span>
+  <br><br>Se tutte le scritte sopra sembrano uguali, apri il file con connessione internet attiva.
+</div>
+
+<!-- 01 QUICKSAND 300 -->
+<div class="card">
+  <span class="tag">01 · Quicksand Light 300</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm f-qs" style="font-weight:300">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm f-qs" style="font-weight:500">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 02 QUICKSAND 500 -->
+<div class="card">
+  <span class="tag">02 · Quicksand Medium 500</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm f-qs" style="font-weight:500">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm f-qs" style="font-weight:600">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 03 LATO 300 -->
+<div class="card">
+  <span class="tag">03 · Lato Light 300</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm f-lt" style="font-weight:300">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm f-lt" style="font-weight:400">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 04 LATO 400 -->
+<div class="card">
+  <span class="tag">04 · Lato Regular 400</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm f-lt" style="font-weight:400">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm f-lt" style="font-weight:400">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 05 NUNITO 300 -->
+<div class="card">
+  <span class="tag">05 · Nunito Light 300 · (più vicino ad Avenir)</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm f-nu" style="font-weight:300">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm f-nu" style="font-weight:400">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 06 POPPINS 300 -->
+<div class="card">
+  <span class="tag">06 · Poppins Light 300</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm f-pp" style="font-weight:300">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm f-pp" style="font-weight:400">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 07 POPPINS 400 -->
+<div class="card">
+  <span class="tag">07 · Poppins Regular 400</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm f-pp" style="font-weight:400">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm f-pp" style="font-weight:500">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+</body>
+</html>

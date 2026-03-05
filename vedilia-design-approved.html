@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vedilia — Dark</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#32323C;--bg-2:#3A3A45;--bg-3:#40404C;--surface:#47474F;
+  --border:rgba(255,255,255,0.09);--border-strong:rgba(255,255,255,0.16);
+  --text-1:#F4F4F5;--text-2:#A1A1AA;--text-3:#71717A;
+  --accent:#3B82F6;--accent-glow:rgba(59,130,246,0.14);
+  --green:#22C55E;--green-glow:rgba(34,197,94,0.12);
+  --yellow:#EAB308;--radius:16px;--radius-sm:10px;--radius-lg:24px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text-1);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;background:rgba(50,50,60,0.82);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.logo{font-size:18px;font-weight:700;letter-spacing:-0.5px;color:var(--text-1);text-decoration:none}
+.nav-center{display:flex;gap:8px}
+.nav-center a{font-size:14px;font-weight:500;color:var(--text-2);text-decoration:none;padding:6px 14px;border-radius:8px;transition:color .2s,background .2s}
+.nav-center a:hover{color:var(--text-1);background:rgba(255,255,255,0.06)}
+.nav-right{display:flex;gap:10px;align-items:center}
+.btn-ghost{font-size:14px;font-weight:500;color:var(--text-2);text-decoration:none;padding:7px 16px;border-radius:8px;transition:color .2s,background .2s}
+.btn-ghost:hover{color:var(--text-1);background:rgba(255,255,255,0.06)}
+.btn-nav{font-size:14px;font-weight:600;color:#000;background:var(--text-1);text-decoration:none;padding:8px 18px;border-radius:8px;transition:opacity .2s}
+.btn-nav:hover{opacity:.88}
+
+/* HERO */
+.hero{padding:160px 40px 80px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:500px;background:radial-gradient(ellipse at 50% 0%,rgba(59,130,246,0.1) 0%,transparent 70%);pointer-events:none}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);margin-bottom:28px;padding:6px 14px;border:1px solid rgba(59,130,246,0.25);border-radius:100px;background:rgba(59,130,246,0.07)}
+.pulse{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:p 2s infinite}
+@keyframes p{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{font-size:clamp(46px,6vw,80px);font-weight:900;letter-spacing:-3px;line-height:1.0;margin:0 auto 28px;background:linear-gradient(180deg,#F4F4F5 0%,#71717A 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;max-width:860px}
+.hero-sub{font-size:18px;color:var(--text-2);max-width:500px;margin:0 auto 44px;line-height:1.7}
+.hero-actions{display:flex;gap:12px;justify-content:center;margin-bottom:14px}
+.btn-hp{background:var(--text-1);color:#000;font-size:15px;font-weight:700;padding:13px 28px;border-radius:10px;text-decoration:none;transition:opacity .2s,transform .15s;display:inline-flex;align-items:center;gap:8px}
+.btn-hp:hover{opacity:.9;transform:translateY(-1px)}
+.btn-hs{background:rgba(255,255,255,0.06);color:var(--text-2);font-size:15px;font-weight:600;padding:13px 28px;border-radius:10px;text-decoration:none;border:1px solid var(--border-strong);transition:background .2s,color .2s}
+.btn-hs:hover{background:rgba(255,255,255,0.1);color:var(--text-1)}
+.hero-caption{font-size:13px;color:var(--text-3)}
+
+/* PREVIEW */
+.preview-wrap{padding:0 40px;max-width:1180px;margin:60px auto 0}
+.product-preview{border-radius:var(--radius-lg);border:1px solid var(--border-strong);background:var(--bg-2);overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,0.04),0 40px 80px rgba(0,0,0,0.4);position:relative}
+.product-preview::before{content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:300px;height:1px;background:linear-gradient(90deg,transparent,rgba(59,130,246,0.5),transparent)}
+.preview-bar{display:flex;align-items:center;gap:8px;padding:14px 20px;border-bottom:1px solid var(--border);background:var(--bg-3)}
+.dot-r{width:12px;height:12px;border-radius:50%;background:#FF5F57}.dot-y{width:12px;height:12px;border-radius:50%;background:#FFBD2E}.dot-g{width:12px;height:12px;border-radius:50%;background:#28CA41}
+.preview-url{flex:1;text-align:center;font-size:12px;color:var(--text-3);background:rgba(255,255,255,0.04);border-radius:6px;padding:4px 12px;max-width:280px;margin:0 auto}
+.preview-body{display:grid;grid-template-columns:210px 1fr;min-height:380px}
+.preview-sidebar{border-right:1px solid var(--border);padding:20px;background:var(--bg-3)}
+.sidebar-label{font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;padding:0 8px}
+.sidebar-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text-2);margin-bottom:2px}
+.sidebar-item.active{background:rgba(59,130,246,0.12);color:var(--accent)}
+.preview-main{padding:28px 32px}
+.preview-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.preview-title{font-size:18px;font-weight:700;letter-spacing:-.4px}
+.preview-date{font-size:12px;color:var(--text-3)}
+.preview-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px}
+.stat-card-label{font-size:11px;color:var(--text-3);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.stat-card-value{font-size:24px;font-weight:800;letter-spacing:-.8px}
+.stat-card-value.green{color:var(--green)}.stat-card-value.blue{color:var(--accent)}
+.opp-list{display:flex;flex-direction:column;gap:8px}
+.opp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:13px 16px;display:flex;align-items:center;gap:12px}
+.opp-ring{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.ring-g{background:var(--green-glow);color:var(--green);border:2px solid rgba(34,197,94,0.25)}
+.ring-b{background:var(--accent-glow);color:var(--accent);border:2px solid rgba(59,130,246,0.25)}
+.ring-y{background:rgba(234,179,8,0.1);color:var(--yellow);border:2px solid rgba(234,179,8,0.25)}
+.opp-info{flex:1}.opp-title{font-size:13px;font-weight:600;margin-bottom:2px}.opp-meta{font-size:11px;color:var(--text-3)}
+.opp-right{text-align:right;flex-shrink:0}.opp-amount{font-size:12px;font-weight:700;color:var(--text-2)}.opp-deadline{font-size:11px;color:var(--text-3)}
+.opp-btn{font-size:12px;font-weight:600;color:var(--text-2);background:rgba(255,255,255,0.06);border:1px solid var(--border-strong);padding:5px 11px;border-radius:6px;white-space:nowrap}
+
+/* STATS */
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-top:80px}
+.stat-block{background:var(--bg);padding:40px 32px;text-align:center}
+.stat-block-number{font-size:40px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:8px;background:linear-gradient(180deg,#F4F4F5 0%,#71717A 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-block-label{font-size:14px;color:var(--text-3)}
+
+/* SECTIONS */
+.section{padding:90px 40px;max-width:1100px;margin:0 auto}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:var(--accent);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--accent)}
+.section-title{font-size:clamp(32px,4vw,48px);font-weight:800;letter-spacing:-1.5px;line-height:1.1;margin-bottom:16px;max-width:600px}
+.section-sub{font-size:17px;color:var(--text-2);max-width:500px;line-height:1.7;margin-bottom:52px}
+
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.feature-cell{background:var(--bg);padding:34px 30px;transition:background .2s}
+.feature-cell:hover{background:var(--bg-2)}
+.feature-icon{font-size:24px;margin-bottom:14px;display:block}
+.feature-cell h3{font-size:16px;font-weight:700;margin-bottom:9px}
+.feature-cell p{font-size:14px;color:var(--text-2);line-height:1.7}
+
+.alt-section{background:var(--bg-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+
+/* ONBOARDING */
+.onboarding-flow{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.flow-steps{display:flex;flex-direction:column;gap:8px}
+.flow-step{background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
+.flow-step-header{display:flex;align-items:center;gap:12px;padding:14px 18px}
+.flow-step-num{width:26px;height:26px;border-radius:50%;background:var(--accent);color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.flow-step-num.done{background:var(--green)}
+.flow-step-title{font-size:14px;font-weight:600}
+.flow-step-body{padding:0 18px 16px 56px;font-size:13px;color:var(--text-2);line-height:1.6}
+.field-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:6px}
+.field-icon{font-size:14px;flex-shrink:0}.field-content{flex:1}
+.field-key{font-size:10px;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;font-weight:500}
+.field-val{font-size:13px;font-weight:600}
+.badge-auto{font-size:10px;font-weight:700;background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.2);padding:3px 8px;border-radius:100px}
+.upload-area{border:1.5px dashed rgba(255,255,255,0.15);border-radius:10px;padding:18px;text-align:center;margin-bottom:10px}
+.upload-area p{font-size:13px;color:var(--text-3)}
+.doc-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.doc-chip{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:5px 10px;font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:5px}
+.chip-check{color:var(--green)}
+.capacity-opt{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text-2)}
+.capacity-opt.selected{border-color:var(--accent);background:rgba(59,130,246,0.06);color:var(--text-1)}
+.cap-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border-strong);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.capacity-opt.selected .cap-radio{border-color:var(--accent);background:var(--accent)}
+.cap-dot{width:6px;height:6px;border-radius:50%;background:white}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:800px;margin:0 auto}
+.price-card{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;position:relative}
+.price-card.featured{border-color:rgba(59,130,246,0.35);background:linear-gradient(160deg,rgba(59,130,246,0.05) 0%,var(--bg-2) 50%)}
+.price-card.featured::before{content:'Più scelto';position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--accent);color:white;font-size:11px;font-weight:700;padding:4px 14px;border-radius:100px;white-space:nowrap}
+.price-tier{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);margin-bottom:14px}
+.price-amount{font-size:50px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:6px}
+.price-amount sup{font-size:20px;font-weight:600;vertical-align:top;margin-top:9px;display:inline-block;color:var(--text-2)}
+.price-amount span{font-size:15px;font-weight:400;color:var(--text-2)}
+.price-desc{font-size:14px;color:var(--text-2);margin-bottom:22px;line-height:1.6}
+.price-divider{height:1px;background:var(--border);margin-bottom:20px}
+.price-features{list-style:none;margin-bottom:26px}
+.price-features li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-2);margin-bottom:10px;line-height:1.5}
+.check-icon{color:var(--green);flex-shrink:0}
+.btn-cp{display:block;width:100%;text-align:center;background:var(--text-1);color:#000;font-size:14px;font-weight:700;padding:12px;border-radius:10px;text-decoration:none;transition:opacity .2s}
+.btn-cp:hover{opacity:.88}
+.btn-cs{display:block;width:100%;text-align:center;background:rgba(255,255,255,0.05);color:var(--text-1);font-size:14px;font-weight:600;padding:12px;border-radius:10px;text-decoration:none;border:1px solid var(--border-strong);transition:background .2s}
+.btn-cs:hover{background:rgba(255,255,255,0.09)}
+
+/* FAQ */
+.faq-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.faq-item{background:var(--bg);padding:26px 32px;transition:background .2s}
+.faq-item:hover{background:var(--bg-2)}
+.faq-q{font-size:16px;font-weight:600;margin-bottom:10px}
+.faq-a{font-size:14px;color:var(--text-2);line-height:1.7}
+
+/* CTA */
+.cta-section{padding:40px 40px 80px}
+.cta-box{background:var(--bg-2);border:1px solid var(--border-strong);border-radius:var(--radius-lg);padding:80px 48px;text-align:center;max-width:1100px;margin:0 auto;position:relative;overflow:hidden}
+.cta-box::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:400px;height:1px;background:linear-gradient(90deg,transparent,rgba(59,130,246,0.5),transparent)}
+.cta-box h2{font-size:clamp(36px,4vw,54px);font-weight:900;letter-spacing:-2px;line-height:1.1;margin-bottom:18px;background:linear-gradient(180deg,#F4F4F5 0%,#71717A 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.cta-box p{font-size:17px;color:var(--text-2);margin-bottom:38px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.7}
+.cta-caption{font-size:13px;color:var(--text-3);margin-top:14px}
+
+footer{border-top:1px solid var(--border);padding:28px 40px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--text-3)}
+.footer-links{display:flex;gap:24px}
+.footer-links a{color:var(--text-3);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--text-2)}
+
+.info-card{background:var(--bg-3);border:1px solid var(--border);border-radius:var(--radius-lg);padding:30px}
+.info-row{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}
+.info-row:last-child{margin-bottom:0}
+.info-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.info-icon.blue{background:rgba(59,130,246,0.1)}.info-icon.green{background:rgba(34,197,94,0.1)}.info-icon.yellow{background:rgba(234,179,8,0.1)}
+.info-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.info-body{font-size:13px;color:var(--text-2);line-height:1.6}
+</style>
+</head>
+<body>
+<nav>
+  <a href="#" class="logo">Vedilia</a>
+  <div class="nav-center"><a href="#come-funziona">Come funziona</a><a href="#prezzi">Prezzi</a><a href="#faq">FAQ</a></div>
+  <div class="nav-right"><a href="#" class="btn-ghost">Accedi</a><a href="#" class="btn-nav">Inizia la prova →</a></div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow"><div class="pulse"></div>Monitoring attivo · 25+ fonti</div>
+  <h1>Opportunità per la tua azienda,<br>ogni settimana.</h1>
+  <p class="hero-sub">Bandi, appalti e fondi pubblici monitorati in automatico. Ogni venerdì le opportunità compatibili con il tuo profilo aziendale.</p>
+  <div class="hero-actions"><a href="#" class="btn-hp">Inizia la prova →</a><a href="#come-funziona" class="btn-hs">Come funziona</a></div>
+  <p class="hero-caption">Inserisci la carta — nessun addebito per 30 giorni. Disdici prima e non paghi nulla.</p>
+</section>
+
+<div class="preview-wrap">
+  <div class="product-preview">
+    <div class="preview-bar"><div class="dot-r"></div><div class="dot-y"></div><div class="dot-g"></div><div class="preview-url">app.vedilia.com/dashboard</div></div>
+    <div class="preview-body">
+      <div class="preview-sidebar">
+        <div class="sidebar-label">Menu</div>
+        <div class="sidebar-item active">⚡ Opportunità</div>
+        <div class="sidebar-item">📋 Domande</div>
+        <div class="sidebar-item">📁 Documenti</div>
+        <div class="sidebar-item">🔔 Alert</div>
+        <div class="sidebar-item">⚙️ Profilo</div>
+      </div>
+      <div class="preview-main">
+        <div class="preview-header"><div class="preview-title">Settimana 10 · 3 nuove opportunità</div><div class="preview-date">Venerdì 7 marzo · 07:00</div></div>
+        <div class="preview-stats">
+          <div class="stat-card"><div class="stat-card-label">Bandi processati</div><div class="stat-card-value blue">847</div></div>
+          <div class="stat-card"><div class="stat-card-label">Score medio</div><div class="stat-card-value green">82%</div></div>
+          <div class="stat-card"><div class="stat-card-label">Valore totale</div><div class="stat-card-value">€530K</div></div>
+        </div>
+        <div class="opp-list">
+          <div class="opp-card"><div class="opp-ring ring-g">94%</div><div class="opp-info"><div class="opp-title">Bando digitalizzazione PMI — MIMIT</div><div class="opp-meta">Contributo a fondo perduto · Scadenza 15 mar 2026</div></div><div class="opp-right"><div class="opp-amount">fino a €50.000</div><div class="opp-deadline">9 giorni</div></div><div class="opp-btn">Vedi dettagli →</div></div>
+          <div class="opp-card"><div class="opp-ring ring-b">81%</div><div class="opp-info"><div class="opp-title">Appalto servizi IT — Regione Lombardia</div><div class="opp-meta">Gara pubblica MEPA · Scadenza 28 mar 2026</div></div><div class="opp-right"><div class="opp-amount">€180.000</div><div class="opp-deadline">22 giorni</div></div><div class="opp-btn">Vedi dettagli →</div></div>
+          <div class="opp-card"><div class="opp-ring ring-y">71%</div><div class="opp-info"><div class="opp-title">Fondo export SIMEST internazionalizzazione</div><div class="opp-meta">Finanziamento agevolato · Scadenza 30 apr 2026</div></div><div class="opp-right"><div class="opp-amount">fino a €300.000</div><div class="opp-deadline">54 giorni</div></div><div class="opp-btn">Vedi dettagli →</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stats-strip">
+  <div class="stat-block"><div class="stat-block-number">25+</div><div class="stat-block-label">fonti monitorate</div></div>
+  <div class="stat-block"><div class="stat-block-number">847</div><div class="stat-block-label">bandi/settimana</div></div>
+  <div class="stat-block"><div class="stat-block-number">&lt;1s</div><div class="stat-block-label">onboarding P.IVA</div></div>
+  <div class="stat-block"><div class="stat-block-number">60%</div><div class="stat-block-label">soglia compatibilità</div></div>
+</div>
+
+<div class="section" id="come-funziona">
+  <div class="eyebrow">Come funziona</div>
+  <h2 class="section-title">Semplice da subito.<br>Automatico per sempre.</h2>
+  <p class="section-sub">Nessuna ricerca manuale. Nessun consulente. Nessuna perdita di tempo.</p>
+  <div class="feature-grid">
+    <div class="feature-cell"><span class="feature-icon">🎯</span><h3>Profilo automatico</h3><p>Inserisci solo la P.IVA. In meno di un secondo il sistema recupera ragione sociale, ATECO, PEC, sede e dimensione dalla Camera di Commercio.</p></div>
+    <div class="feature-cell"><span class="feature-icon">🔍</span><h3>Monitoring continuo</h3><p>Ogni giovedì notte scansione automatica di TED, ANAC, MEPA, PNRR, SIMEST e altre fonti. Senza che tu faccia nulla.</p></div>
+    <div class="feature-cell"><span class="feature-icon">📬</span><h3>Digest settimanale</h3><p>Ogni venerdì alle 7:00 un'unica email con le opportunità compatibili con la tua azienda. Solo sopra il 60% di compatibilità.</p></div>
+    <div class="feature-cell"><span class="feature-icon">📄</span><h3>Pre-compilazione AI</h3><p>Clicca "Vedi dettagli" poi "Precompila domanda" — il sistema genera una bozza completa. Tu rivedi, firmi e invii alla fonte ufficiale.</p></div>
+    <div class="feature-cell"><span class="feature-icon">🔔</span><h3>Alert scadenze</h3><p>Per il Piano Professionale: avvisi immediati quando una scadenza si avvicina. Nessun bando perso per distrazione.</p></div>
+    <div class="feature-cell"><span class="feature-icon">📊</span><h3>Dashboard completa</h3><p>Storico opportunità, bozze generate, documenti caricati. Tutto in un unico posto, sempre aggiornato.</p></div>
+  </div>
+</div>
+
+<div class="alt-section">
+  <div class="section" style="padding-top:80px;padding-bottom:80px;">
+    <div class="eyebrow">Onboarding guidato</div>
+    <h2 class="section-title">Configurazione una volta.<br>Il resto è automatico.</h2>
+    <p class="section-sub">Più informazioni fornisci, più precise saranno le opportunità e più accurata la pre-compilazione.</p>
+    <div class="onboarding-flow">
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-header"><div class="flow-step-num done">✓</div><div class="flow-step-title">Inserisci la P.IVA</div></div>
+          <div class="flow-step-body">
+            <div class="field-row"><div class="field-icon">🏢</div><div class="field-content"><div class="field-key">Ragione Sociale</div><div class="field-val">Rossi Technologies Srl</div></div><span class="badge-auto">Auto ✓</span></div>
+            <div class="field-row"><div class="field-icon">📋</div><div class="field-content"><div class="field-key">ATECO</div><div class="field-val">62.01 — Produzione software</div></div><span class="badge-auto">Auto ✓</span></div>
+            <div class="field-row"><div class="field-icon">📍</div><div class="field-content"><div class="field-key">Sede</div><div class="field-val">Via Roma 12 · Milano</div></div><span class="badge-auto">Auto ✓</span></div>
+            <div class="field-row"><div class="field-icon">👥</div><div class="field-content"><div class="field-key">Dimensione</div><div class="field-val">12 dipendenti · ~€850K fatturato</div></div><span class="badge-auto">Auto ✓</span></div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-header"><div class="flow-step-num done">✓</div><div class="flow-step-title">Conferma profilo e zone operative</div></div>
+          <div class="flow-step-body">Confermi i dati, aggiungi certificazioni (ISO, SOA, ecc.) e le regioni in cui operi.</div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-header"><div class="flow-step-num">3</div><div class="flow-step-title">Carica i documenti aziendali</div></div>
+          <div class="flow-step-body">
+            <div class="upload-area"><p><strong>Trascina i file qui</strong> o clicca per sfogliare</p><p style="margin-top:4px;font-size:12px;">PDF, DOC · Max 20MB per file</p></div>
+            <div class="doc-chips">
+              <div class="doc-chip"><span class="chip-check">✓</span> Visura camerale</div>
+              <div class="doc-chip"><span class="chip-check">✓</span> Ultimo bilancio</div>
+              <div class="doc-chip"><span class="chip-check">✓</span> DURC</div>
+              <div class="doc-chip" style="color:var(--text-3)">+ Certificazioni ISO</div>
+              <div class="doc-chip" style="color:var(--text-3)">+ Autorizzazioni</div>
+              <div class="doc-chip" style="color:var(--text-3)">+ Mezzi strumentali</div>
+            </div>
+            <p style="font-size:12px;color:var(--text-3);margin-top:10px;">Salvati una volta, riutilizzati automaticamente nelle pre-compilazioni future.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-header"><div class="flow-step-num">4</div><div class="flow-step-title">Capacità finanziaria per appalti</div></div>
+          <div class="flow-step-body">
+            <p style="font-size:13px;color:var(--text-2);margin-bottom:10px;">Qual è la vostra capacità per una singola commessa?</p>
+            <div class="capacity-opt"><div class="cap-radio"></div> Fino a €50.000</div>
+            <div class="capacity-opt selected"><div class="cap-radio"><div class="cap-dot"></div></div> €50.000 – €200.000</div>
+            <div class="capacity-opt"><div class="cap-radio"></div> €200.000 – €1.000.000</div>
+            <div class="capacity-opt"><div class="cap-radio"></div> Oltre €1.000.000</div>
+            <p style="font-size:12px;color:var(--text-3);margin-top:10px;">Vedilia esclude automaticamente gli appalti fuori dalla tua portata finanziaria.</p>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="info-card">
+          <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);margin-bottom:20px;">Perché questi dati?</div>
+          <div class="info-row"><div class="info-icon blue">🎯</div><div><div class="info-title">Matching più preciso</div><div class="info-body">ATECO e certificazioni aumentano la precisione del motore AI. Meno rumore, più opportunità reali.</div></div></div>
+          <div class="info-row"><div class="info-icon green">📄</div><div><div class="info-title">Pre-compilazione accurata</div><div class="info-body">Bilancio, DURC e visura vengono usati per compilare automaticamente i campi della domanda.</div></div></div>
+          <div class="info-row"><div class="info-icon yellow">⚖️</div><div><div class="info-title">Nessun appalto fuori portata</div><div class="info-body">La capacità finanziaria è un filtro automatico. Vedi solo opportunità alla tua portata.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="prezzi">
+  <div class="eyebrow" style="justify-content:center">Prezzi</div>
+  <h2 class="section-title" style="text-align:center;margin:0 auto 14px">Semplice e trasparente.</h2>
+  <p class="section-sub" style="text-align:center;margin:0 auto 52px">Nessun costo nascosto. Disdici quando vuoi.</p>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-tier">Essenziale</div>
+      <div class="price-amount"><sup>€</sup>149<span>/mese</span></div>
+      <div class="price-desc">Il monitoring intelligente che non ti fa perdere nessuna opportunità.</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="check-icon">✓</span> Monitoring 25+ fonti nazionali ed europee</li>
+        <li><span class="check-icon">✓</span> Digest settimanale personalizzato (ven. 07:00)</li>
+        <li><span class="check-icon">✓</span> Score compatibilità con AI</li>
+        <li><span class="check-icon">✓</span> Dashboard e storico opportunità</li>
+        <li><span class="check-icon">✓</span> Onboarding automatico con P.IVA</li>
+        <li><span class="check-icon">✓</span> Pre-compilazione: <strong style="color:var(--text-1)">€9 a documento</strong></li>
+      </ul>
+      <a href="#" class="btn-cs">Inizia la prova</a>
+    </div>
+    <div class="price-card featured">
+      <div class="price-tier">Professionale</div>
+      <div class="price-amount"><sup>€</sup>449<span>/mese</span></div>
+      <div class="price-desc">Per chi vuole partecipare attivamente, non solo monitorare.</div>
+      <div class="price-divider"></div>
+      <ul class="price-features">
+        <li><span class="check-icon">✓</span> Tutto il Piano Essenziale</li>
+        <li><span class="check-icon">✓</span> Pre-compilazione <strong style="color:var(--text-1)">illimitata inclusa</strong></li>
+        <li><span class="check-icon">✓</span> Alert immediati scadenze &lt;15 giorni</li>
+        <li><span class="check-icon">✓</span> Checklist documenti automatica</li>
+        <li><span class="check-icon">✓</span> Supporto prioritario</li>
+        <li><span class="check-icon">✓</span> Report mensile performance</li>
+      </ul>
+      <a href="#" class="btn-cp">Inizia la prova →</a>
+    </div>
+  </div>
+  <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--text-3)">Usa il codice <strong style="color:var(--text-2)">VEDILIA30</strong> per 30 giorni di prova — nessun addebito fino alla scadenza.</p>
+</div>
+
+<div class="alt-section">
+  <div class="section" id="faq" style="padding-top:80px;padding-bottom:80px">
+    <div class="eyebrow">FAQ</div>
+    <h2 class="section-title">Domande frequenti.</h2>
+    <div class="faq-list" style="margin-top:36px">
+      <div class="faq-item"><div class="faq-q">La pre-compilazione è definitiva?</div><div class="faq-a">No. Vedilia genera sempre una <strong>bozza da verificare</strong>. I campi incerti vengono evidenziati. Tu rivedi, correggi, firmi e invii autonomamente. Vedilia non invia mai documenti per conto tuo.</div></div>
+      <div class="faq-item"><div class="faq-q">Quante fonti monitorate?</div><div class="faq-a">Al lancio 25+ fonti: TED/OJEU Europa, ANAC, MEPA, Invitalia, MIMIT, PNRR, SIMEST, Mediocredito Centrale. Nuove fonti aggiunte ogni mese.</div></div>
+      <div class="faq-item"><div class="faq-q">Cosa succede se non ci sono bandi compatibili?</div><div class="faq-a">Nessuna email. Mostriamo solo opportunità sopra il 60% di compatibilità. Zero rumore nella tua casella.</div></div>
+      <div class="faq-item"><div class="faq-q">I miei dati sono al sicuro?</div><div class="faq-a">Sì. Server europei (EU West), GDPR compliant. I tuoi documenti non lasciano mai l'Europa. Contratto DPA disponibile su richiesta.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="cta-section">
+  <div class="cta-box">
+    <h2>Smetti di cercare.<br>Inizia a trovare.</h2>
+    <p>Inserisci la P.IVA. Il sistema fa il resto.<br>Una email a settimana con ciò che conta davvero.</p>
+    <a href="#" class="btn-hp">Inizia la prova →</a>
+    <p class="cta-caption">Inserisci la carta — nessun addebito per 30 giorni. Disdici prima e non paghi nulla.</p>
+  </div>
+</div>
+
+<footer>
+  <span style="font-weight:700;color:var(--text-2)">Vedilia</span>
+  <div class="footer-links"><a href="#">Privacy</a><a href="#">Termini</a><a href="#">Cookie</a><a href="#">Contatti</a></div>
+  <span>© 2026 Vedilia</span>
+</footer>
+</body>
+</html>

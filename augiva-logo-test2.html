@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Augiva — Font Test 2</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400&family=Varela+Round&family=Urbanist:wght@200;300;400&family=Outfit:wght@200;300;400&family=Plus+Jakarta+Sans:wght@200;300;400&family=Lexend:wght@200;300&family=Jost:wght@200;300;400&family=Sora:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #32323C;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 60px 40px;
+}
+
+.font-block {
+  width: 100%;
+  max-width: 700px;
+  padding: 48px 60px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.font-block:last-child { border-bottom: none; }
+
+.font-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #52525B;
+  margin-bottom: 16px;
+}
+
+.logo {
+  font-size: 68px;
+  line-height: 1;
+  color: #F4F4F5;
+  letter-spacing: -0.5px;
+}
+
+.logo.gradient {
+  background: linear-gradient(180deg, #F4F4F5 0%, #8E8E93 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.note {
+  font-family: 'Outfit', sans-serif;
+  font-size: 12px;
+  color: #52525B;
+  margin-top: 10px;
+}
+
+.f-poppins-200   { font-family: 'Poppins', sans-serif; font-weight: 200; }
+.f-poppins-300   { font-family: 'Poppins', sans-serif; font-weight: 300; }
+.f-varela        { font-family: 'Varela Round', sans-serif; font-weight: 400; }
+.f-urbanist-200  { font-family: 'Urbanist', sans-serif; font-weight: 200; }
+.f-urbanist-300  { font-family: 'Urbanist', sans-serif; font-weight: 300; }
+.f-outfit-200    { font-family: 'Outfit', sans-serif; font-weight: 200; }
+.f-outfit-300    { font-family: 'Outfit', sans-serif; font-weight: 300; }
+.f-jakarta-200   { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 200; }
+.f-jakarta-300   { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 300; }
+.f-jost-200      { font-family: 'Jost', sans-serif; font-weight: 200; }
+.f-jost-300      { font-family: 'Jost', sans-serif; font-weight: 300; }
+.f-sora-200      { font-family: 'Sora', sans-serif; font-weight: 200; }
+.f-lexend-200    { font-family: 'Lexend', sans-serif; font-weight: 200; }
+.f-lexend-300    { font-family: 'Lexend', sans-serif; font-weight: 300; }
+</style>
+</head>
+<body>
+
+  <div class="font-block">
+    <div class="font-label">01 · Poppins — ExtraLight 200</div>
+    <div class="logo f-poppins-200">augiva</div>
+    <div class="note">Geometrico puro · forme circolari · stile simile AO</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">02 · Poppins — Light 300</div>
+    <div class="logo f-poppins-300">augiva</div>
+    <div class="note">Leggermente più presente · molto pulito</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">03 · Poppins — Light 300 · gradiente</div>
+    <div class="logo f-poppins-300 gradient">augiva</div>
+    <div class="note">Con sfumatura premium del sito</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">04 · Varela Round — Regular</div>
+    <div class="logo f-varela">augiva</div>
+    <div class="note">Molto arrotondato · forme quasi identiche all'AO · leggermente più pieno</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">05 · Urbanist — ExtraLight 200</div>
+    <div class="logo f-urbanist-200">augiva</div>
+    <div class="note">Sottilissimo · molto moderno · leggermente condensato</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">06 · Urbanist — Light 300</div>
+    <div class="logo f-urbanist-300">augiva</div>
+    <div class="note">Equilibrato · molto premium · pulito</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">07 · Outfit — ExtraLight 200</div>
+    <div class="logo f-outfit-200">augiva</div>
+    <div class="note">Geometrico moderno · molto elegante in peso sottile</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">08 · Plus Jakarta Sans — ExtraLight 200</div>
+    <div class="logo f-jakarta-200">augiva</div>
+    <div class="note">Brand premium · stile contemporaneo</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">09 · Jost — ExtraLight 200</div>
+    <div class="logo f-jost-200">augiva</div>
+    <div class="note">Geometrico puro · stile Futura moderno</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">10 · Sora — ExtraLight 200</div>
+    <div class="logo f-sora-200">augiva</div>
+    <div class="note">Giapponese-occidentale · forme molto precise</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">11 · Lexend — Light 300</div>
+    <div class="logo f-lexend-300">augiva</div>
+    <div class="note">Leggibile · elegante · molto neutro</div>
+  </div>
+
+</body>
+</html>

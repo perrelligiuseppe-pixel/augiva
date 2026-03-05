@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Augiva — Font Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500&family=Comfortaa:wght@300;400&family=Nunito:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #32323C;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: 0;
+  padding: 60px 40px;
+}
+
+.font-block {
+  width: 100%;
+  max-width: 700px;
+  padding: 52px 60px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.font-block:last-child { border-bottom: none; }
+
+.font-label {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #71717A;
+  margin-bottom: 8px;
+}
+
+/* OPZIONE 1 — Quicksand Light */
+.logo-quicksand {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 300;
+  font-size: 64px;
+  letter-spacing: -1px;
+  color: #F4F4F5;
+  line-height: 1;
+}
+
+/* OPZIONE 2 — Quicksand Regular (confronto) */
+.logo-quicksand-400 {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 400;
+  font-size: 64px;
+  letter-spacing: -1px;
+  color: #F4F4F5;
+  line-height: 1;
+}
+
+/* OPZIONE 3 — Comfortaa Light */
+.logo-comfortaa {
+  font-family: 'Comfortaa', cursive;
+  font-weight: 300;
+  font-size: 64px;
+  letter-spacing: 0px;
+  color: #F4F4F5;
+  line-height: 1;
+}
+
+/* OPZIONE 4 — Comfortaa Regular */
+.logo-comfortaa-400 {
+  font-family: 'Comfortaa', cursive;
+  font-weight: 400;
+  font-size: 64px;
+  letter-spacing: 0px;
+  color: #F4F4F5;
+  line-height: 1;
+}
+
+/* OPZIONE 5 — Nunito ExtraLight */
+.logo-nunito-200 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 200;
+  font-size: 64px;
+  letter-spacing: 1px;
+  color: #F4F4F5;
+  line-height: 1;
+}
+
+/* OPZIONE 6 — Nunito Light */
+.logo-nunito-300 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 300;
+  font-size: 64px;
+  letter-spacing: 1px;
+  color: #F4F4F5;
+  line-height: 1;
+}
+
+.weight-note {
+  font-family: 'Quicksand', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  color: #52525B;
+  margin-top: 4px;
+}
+
+/* Gradient version preview */
+.logo-gradient {
+  background: linear-gradient(180deg, #F4F4F5 0%, #8E8E93 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+</style>
+</head>
+<body>
+
+  <div class="font-block">
+    <div class="font-label">01 · Quicksand — Light 300</div>
+    <div class="logo-quicksand">augiva</div>
+    <div class="weight-note">Geometrico arrotondato · peso leggero · elegante</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">02 · Quicksand — Light 300 con gradiente</div>
+    <div class="logo-quicksand logo-gradient">augiva</div>
+    <div class="weight-note">Come sopra ma con il gradiente dei titoli del sito</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">03 · Quicksand — Regular 400</div>
+    <div class="logo-quicksand-400">augiva</div>
+    <div class="weight-note">Leggermente più presente, ancora elegante</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">04 · Comfortaa — Light 300 · (stile AO)</div>
+    <div class="logo-comfortaa">augiva</div>
+    <div class="weight-note">Il più vicino all'Australian Open · forme molto tonde</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">05 · Comfortaa — Regular 400 · (stile AO bold)</div>
+    <div class="logo-comfortaa-400">augiva</div>
+    <div class="weight-note">Come AO ma senza grassetto — ancora raffinato</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">06 · Nunito — ExtraLight 200</div>
+    <div class="logo-nunito-200">augiva</div>
+    <div class="weight-note">Leggerissimo · sofisticato · quasi tipografico</div>
+  </div>
+
+  <div class="font-block">
+    <div class="font-label">07 · Nunito — Light 300</div>
+    <div class="logo-nunito-300">augiva</div>
+    <div class="weight-note">Bilanciato tra leggerezza ed eleganza</div>
+  </div>
+
+</body>
+</html>

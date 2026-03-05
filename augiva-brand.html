@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Augiva — Brand Concepts</title>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@200;300;400;500&family=Outfit:wght@200;300;400&family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #1E1E24;
+  font-family: 'Urbanist', sans-serif;
+  color: #F4F4F5;
+  -webkit-font-smoothing: antialiased;
+  padding: 60px 40px;
+}
+
+h1 {
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #52525B;
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.concept {
+  max-width: 860px;
+  margin: 0 auto 100px;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 24px;
+  overflow: hidden;
+}
+
+.concept-label {
+  padding: 20px 40px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #52525B;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.concept-label span { color: #3B82F6; font-size: 10px; }
+
+/* CONCEPT A — Geometric Mark */
+.concept-a-hero {
+  padding: 80px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #32323C;
+  gap: 20px;
+}
+
+.mark-a {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.wordmark-a {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 200;
+  font-size: 52px;
+  letter-spacing: 6px;
+  color: #F4F4F5;
+  text-transform: lowercase;
+  line-height: 1;
+}
+
+.concept-a-dark {
+  padding: 60px;
+  background: #1E1E24;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+
+.wordmark-a-sm {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 300;
+  font-size: 28px;
+  letter-spacing: 4px;
+  color: #A1A1AA;
+  text-transform: lowercase;
+}
+
+.concept-a-light {
+  padding: 60px;
+  background: #EBEBEF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.wordmark-a-light {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 200;
+  font-size: 40px;
+  letter-spacing: 5px;
+  color: #1D1D1F;
+  text-transform: lowercase;
+}
+
+/* CONCEPT B — Wordmark with gradient, no icon */
+.concept-b-hero {
+  padding: 80px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #32323C;
+}
+
+.wordmark-b {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 200;
+  font-size: 72px;
+  letter-spacing: 12px;
+  background: linear-gradient(180deg, #F4F4F5 0%, #71717A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-transform: lowercase;
+  line-height: 1;
+  text-indent: 12px; /* compensate first-letter spacing */
+}
+
+.concept-b-tagline {
+  padding: 36px 60px;
+  background: #2A2A34;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tagline-word {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 200;
+  font-size: 56px;
+  letter-spacing: 10px;
+  text-indent: 10px;
+  background: linear-gradient(180deg, #F4F4F5 0%, #71717A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.tagline-sub {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #52525B;
+}
+
+/* CONCEPT C — Elegant serif meets geometric */
+.concept-c-hero {
+  padding: 80px 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #32323C;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mark-c {
+  width: 44px;
+  height: 44px;
+}
+
+.wordmark-c {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 64px;
+  letter-spacing: 10px;
+  color: #F4F4F5;
+  text-transform: lowercase;
+  line-height: 1;
+  text-indent: 10px;
+}
+
+.wordmark-c-gradient {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 52px;
+  letter-spacing: 8px;
+  background: linear-gradient(180deg, #F4F4F5 30%, #71717A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-transform: lowercase;
+  text-indent: 8px;
+}
+
+.concept-c-sub {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: #52525B;
+}
+
+.nav-preview {
+  padding: 22px 40px;
+  background: rgba(22,22,28,0.9);
+  border-top: 1px solid rgba(255,255,255,0.07);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-links-p {
+  display: flex;
+  gap: 24px;
+}
+
+.nav-link-p {
+  font-size: 13px;
+  font-weight: 400;
+  color: #71717A;
+  font-family: 'Urbanist', sans-serif;
+}
+
+.nav-btn-p {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1D1D1F;
+  background: #F4F4F5;
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-family: 'Urbanist', sans-serif;
+}
+
+.divider-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #3B3B45;
+  text-align: center;
+  padding: 20px;
+  font-family: 'Urbanist', sans-serif;
+}
+</style>
+</head>
+<body>
+
+<h1>Augiva — Brand Concepts</h1>
+
+<!-- CONCEPT A -->
+<div class="concept">
+  <div class="concept-label">
+    Concept A — Geometric Icon + Wordmark spaziato
+    <span>MINIMAL · TECH · INTERNAZIONALE</span>
+  </div>
+
+  <!-- Logo principale su sfondo sito -->
+  <div class="concept-a-hero">
+    <svg class="mark-a" viewBox="0 0 52 52" fill="none">
+      <!-- A geometrica stilizzata -->
+      <path d="M26 6 L46 44 H36 L26 24 L16 44 H6 L26 6Z" fill="none" stroke="#F4F4F5" stroke-width="2" stroke-linejoin="round"/>
+      <line x1="14" y1="34" x2="38" y2="34" stroke="#F4F4F5" stroke-width="2"/>
+      <!-- Punto accent in blu -->
+      <circle cx="26" cy="6" r="3" fill="#3B82F6"/>
+    </svg>
+    <div class="wordmark-a">augiva</div>
+  </div>
+
+  <!-- Nav preview -->
+  <div class="nav-preview">
+    <div style="display:flex;align-items:center;gap:14px">
+      <svg width="24" height="24" viewBox="0 0 52 52" fill="none">
+        <path d="M26 6 L46 44 H36 L26 24 L16 44 H6 L26 6Z" fill="none" stroke="#F4F4F5" stroke-width="2.5" stroke-linejoin="round"/>
+        <line x1="14" y1="34" x2="38" y2="34" stroke="#F4F4F5" stroke-width="2.5"/>
+        <circle cx="26" cy="6" r="3" fill="#3B82F6"/>
+      </svg>
+      <span style="font-family:'Urbanist';font-weight:300;font-size:16px;letter-spacing:3px;color:#F4F4F5">augiva</span>
+    </div>
+    <div class="nav-links-p">
+      <span class="nav-link-p">Come funziona</span>
+      <span class="nav-link-p">Prezzi</span>
+    </div>
+    <div class="nav-btn-p">Inizia la prova</div>
+  </div>
+
+  <!-- Su sfondo chiaro -->
+  <div class="concept-a-light">
+    <svg width="32" height="32" viewBox="0 0 52 52" fill="none">
+      <path d="M26 6 L46 44 H36 L26 24 L16 44 H6 L26 6Z" fill="none" stroke="#1D1D1F" stroke-width="2" stroke-linejoin="round"/>
+      <line x1="14" y1="34" x2="38" y2="34" stroke="#1D1D1F" stroke-width="2"/>
+      <circle cx="26" cy="6" r="3" fill="#0066CC"/>
+    </svg>
+    <div class="wordmark-a-light">augiva</div>
+  </div>
+</div>
+
+<!-- CONCEPT B -->
+<div class="concept">
+  <div class="concept-label">
+    Concept B — Solo wordmark, spaziatura estrema + gradiente
+    <span>LUSSO · FASHION · PREMIUM</span>
+  </div>
+
+  <div class="concept-b-hero">
+    <div class="wordmark-b">augiva</div>
+  </div>
+
+  <div class="concept-b-tagline">
+    <div class="tagline-word">augiva</div>
+    <div class="tagline-sub">opportunità · ogni settimana</div>
+  </div>
+
+  <div class="nav-preview">
+    <span style="font-family:'Urbanist';font-weight:200;font-size:18px;letter-spacing:5px;color:#F4F4F5;text-indent:5px">augiva</span>
+    <div class="nav-links-p">
+      <span class="nav-link-p">Come funziona</span>
+      <span class="nav-link-p">Prezzi</span>
+    </div>
+    <div class="nav-btn-p">Inizia la prova</div>
+  </div>
+</div>
+
+<!-- CONCEPT C -->
+<div class="concept">
+  <div class="concept-label">
+    Concept C — Serif elegante · stile istituzionale
+    <span>ELEGANTE · AUTOREVOLE · FIDUCIA</span>
+  </div>
+
+  <div class="concept-c-hero">
+    <!-- Cerchio sottile con A -->
+    <svg class="mark-c" viewBox="0 0 44 44" fill="none">
+      <circle cx="22" cy="22" r="20" stroke="#F4F4F5" stroke-width="1"/>
+      <path d="M22 10 L32 34 H28 L22 18 L16 34 H12 L22 10Z" fill="#F4F4F5"/>
+      <line x1="16" y1="28" x2="28" y2="28" stroke="#32323C" stroke-width="1.5"/>
+    </svg>
+    <div class="wordmark-c">augiva</div>
+  </div>
+
+  <div style="padding:48px 60px;background:#2A2A34;border-top:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px">
+    <div class="wordmark-c-gradient">augiva</div>
+    <div class="concept-c-sub">Intelligenza finanziaria per le PMI</div>
+  </div>
+
+  <div class="nav-preview">
+    <div style="display:flex;align-items:center;gap:12px">
+      <svg width="22" height="22" viewBox="0 0 44 44" fill="none">
+        <circle cx="22" cy="22" r="20" stroke="#F4F4F5" stroke-width="1"/>
+        <path d="M22 10 L32 34 H28 L22 18 L16 34 H12 L22 10Z" fill="#F4F4F5"/>
+        <line x1="16" y1="28" x2="28" y2="28" stroke="#2A2A34" stroke-width="1.5"/>
+      </svg>
+      <span style="font-family:'Cormorant Garamond';font-weight:300;font-size:22px;letter-spacing:4px;color:#F4F4F5">augiva</span>
+    </div>
+    <div class="nav-links-p">
+      <span class="nav-link-p">Come funziona</span>
+      <span class="nav-link-p">Prezzi</span>
+    </div>
+    <div class="nav-btn-p">Inizia la prova</div>
+  </div>
+</div>
+
+</body>
+</html>

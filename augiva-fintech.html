@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Augiva — Fintech Premium</title>
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@200;300&family=Outfit:wght@200;300&family=Plus+Jakarta+Sans:wght@200;300&family=DM+Sans:opsz,wght@9..40,200;9..40,300&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #1E1E24;
+  -webkit-font-smoothing: antialiased;
+  padding: 80px 40px;
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-width: 820px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.05);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.row {
+  background: #32323C;
+  padding: 64px 56px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+.row:last-child { border-bottom: none; }
+
+.label {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #3B3B45;
+  align-self: flex-start;
+}
+
+.gr {
+  background: linear-gradient(180deg, #F4F4F5 10%, #6E6E73 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* SVG mark — same circle A, used across all */
+.mark { flex-shrink: 0; }
+
+/* Wordmarks */
+.w-urbanist-200 {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 200;
+  font-size: 72px;
+  letter-spacing: 20px;
+  text-indent: 20px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.w-urbanist-300 {
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 300;
+  font-size: 64px;
+  letter-spacing: 16px;
+  text-indent: 16px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.w-outfit-200 {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 200;
+  font-size: 68px;
+  letter-spacing: 18px;
+  text-indent: 18px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.w-jakarta-200 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 200;
+  font-size: 64px;
+  letter-spacing: 16px;
+  text-indent: 16px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.w-dm-200 {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 200;
+  font-size: 68px;
+  letter-spacing: 16px;
+  text-indent: 16px;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* Stack layout */
+.brand-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+}
+
+/* Nav simulation */
+.nav-sim {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0 0;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  margin-top: 8px;
+}
+
+.nav-logo-sim {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-links-sim {
+  display: flex;
+  gap: 28px;
+}
+
+.nav-link-sim {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: #6E6E73;
+}
+
+.nav-btn-sim {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #1D1D1F;
+  background: #F4F4F5;
+  padding: 8px 18px;
+  border-radius: 7px;
+}
+</style>
+</head>
+<body>
+<div class="grid">
+
+  <!-- 1. Urbanist 200 — il mio preferito -->
+  <div class="row">
+    <div class="label">01 · Urbanist ExtraLight · Fintech premium · Il mio preferito</div>
+    <div class="brand-stack">
+      <svg class="mark" width="54" height="54" viewBox="0 0 58 58" fill="none">
+        <circle cx="29" cy="29" r="27" stroke="url(#g1c)" stroke-width="1.2"/>
+        <path d="M29 12 L41 46 H36.5 L29 24 L21.5 46 H17 L29 12Z" fill="url(#g1a)"/>
+        <line x1="21" y1="38" x2="37" y2="38" stroke="#32323C" stroke-width="2"/>
+        <defs>
+          <linearGradient id="g1c" x1="29" y1="2" x2="29" y2="56" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#F4F4F5"/><stop offset="100%" stop-color="#6E6E73"/>
+          </linearGradient>
+          <linearGradient id="g1a" x1="29" y1="12" x2="29" y2="46" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#F4F4F5"/><stop offset="100%" stop-color="#6E6E73"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="w-urbanist-200 gr">AUGIVA</div>
+    </div>
+    <div class="nav-sim">
+      <div class="nav-logo-sim">
+        <svg width="22" height="22" viewBox="0 0 58 58" fill="none">
+          <circle cx="29" cy="29" r="27" stroke="#A1A1AA" stroke-width="1.5"/>
+          <path d="M29 12 L41 46 H36.5 L29 24 L21.5 46 H17 L29 12Z" fill="#A1A1AA"/>
+          <line x1="21" y1="38" x2="37" y2="38" stroke="#32323C" stroke-width="2"/>
+        </svg>
+        <span style="font-family:'Urbanist';font-weight:200;font-size:17px;letter-spacing:4px;color:#F4F4F5">AUGIVA</span>
+      </div>
+      <div class="nav-links-sim">
+        <span class="nav-link-sim">Come funziona</span>
+        <span class="nav-link-sim">Prezzi</span>
+      </div>
+      <div class="nav-btn-sim">Inizia la prova</div>
+    </div>
+  </div>
+
+  <!-- 2. Outfit 200 -->
+  <div class="row">
+    <div class="label">02 · Outfit ExtraLight · Geometrico pulito</div>
+    <div class="brand-stack">
+      <svg class="mark" width="54" height="54" viewBox="0 0 58 58" fill="none">
+        <circle cx="29" cy="29" r="27" stroke="url(#g2c)" stroke-width="1.2"/>
+        <path d="M29 12 L41 46 H36.5 L29 24 L21.5 46 H17 L29 12Z" fill="url(#g2a)"/>
+        <line x1="21" y1="38" x2="37" y2="38" stroke="#32323C" stroke-width="2"/>
+        <defs>
+          <linearGradient id="g2c" x1="29" y1="2" x2="29" y2="56" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#F4F4F5"/><stop offset="100%" stop-color="#6E6E73"/>
+          </linearGradient>
+          <linearGradient id="g2a" x1="29" y1="12" x2="29" y2="46" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#F4F4F5"/><stop offset="100%" stop-color="#6E6E73"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="w-outfit-200 gr">AUGIVA</div>
+    </div>
+  </div>
+
+  <!-- 3. Plus Jakarta Sans 200 -->
+  <div class="row">
+    <div class="label">03 · Plus Jakarta Sans ExtraLight · Contemporaneo</div>
+    <div class="brand-stack">
+      <svg class="mark" width="54" height="54" viewBox="0 0 58 58" fill="none">
+        <circle cx="29" cy="29" r="27" stroke="url(#g3c)" stroke-width="1.2"/>
+        <path d="M29 12 L41 46 H36.5 L29 24 L21.5 46 H17 L29 12Z" fill="url(#g3a)"/>
+        <line x1="21" y1="38" x2="37" y2="38" stroke="#32323C" stroke-width="2"/>
+        <defs>
+          <linearGradient id="g3c" x1="29" y1="2" x2="29" y2="56" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#F4F4F5"/><stop offset="100%" stop-color="#6E6E73"/>
+          </linearGradient>
+          <linearGradient id="g3a" x1="29" y1="12" x2="29" y2="46" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#F4F4F5"/><stop offset="100%" stop-color="#6E6E73"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="w-jakarta-200 gr">AUGIVA</div>
+    </div>
+  </div>
+
+  <!-- 4. DM Sans 200 -->
+  <div class="row">
+    <div class="label">04 · DM Sans ExtraLight · Stile Google/fintech</div>
+    <div class="brand-stack">
+      <svg class="mark" width="54" height="54" viewBox="0 0 58 58" fill="none">
+        <circle cx="29" cy="29" r="27" stroke="url(#g4c)" stroke-width="1.2"/>
+        <path d="M29 12 L41 46 H36.5 L29 24 L21.5 46 H17 L29 12Z" fill="url(#g4a)"/>
+        <line x1="21" y1="38" x2="37" y2="38" stroke="#32323C" stroke-width="2"/>
+        <defs>
+          <linearGradient id="g4c" x1="29" y1="2" x2="29" y2="56" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#F4F4F5"/><stop offset="100%" stop-color="#6E6E73"/>
+          </linearGradient>
+          <linearGradient id="g4a" x1="29" y1="12" x2="29" y2="46" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#F4F4F5"/><stop offset="100%" stop-color="#6E6E73"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="w-dm-200 gr">AUGIVA</div>
+    </div>
+  </div>
+
+  <!-- 5. Solo simbolo grande (concept alternativo) -->
+  <div class="row">
+    <div class="label">05 · Solo simbolo · Versione icon-only (per favicon/app)</div>
+    <svg width="80" height="80" viewBox="0 0 58 58" fill="none">
+      <circle cx="29" cy="29" r="27" stroke="url(#g5c)" stroke-width="1.2"/>
+      <path d="M29 12 L41 46 H36.5 L29 24 L21.5 46 H17 L29 12Z" fill="url(#g5a)"/>
+      <line x1="21" y1="38" x2="37" y2="38" stroke="#32323C" stroke-width="2"/>
+      <defs>
+        <linearGradient id="g5c" x1="29" y1="2" x2="29" y2="56" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#F4F4F5"/><stop offset="100%" stop-color="#6E6E73"/>
+        </linearGradient>
+        <linearGradient id="g5a" x1="29" y1="12" x2="29" y2="46" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#F4F4F5"/><stop offset="100%" stop-color="#6E6E73"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+
+</div>
+</body>
+</html>

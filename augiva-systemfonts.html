@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Augiva — System Fonts</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #32323C;
+  -webkit-font-smoothing: antialiased;
+  padding: 50px 40px;
+}
+
+.icon {
+  width: 56px; height: 56px;
+  background: #2563EB;
+  border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.icon-sm {
+  width: 30px; height: 30px;
+  background: #2563EB;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.card {
+  background: #2C2C36;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 44px 50px;
+  margin-bottom: 12px;
+}
+
+.tag {
+  font-family: monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #4A4A55;
+  margin-bottom: 24px;
+  display: block;
+}
+
+.brand { display: flex; align-items: center; gap: 18px; }
+.wm { font-size: 52px; line-height: 1; color: #F4F4F5; }
+
+.sep { height: 1px; background: rgba(255,255,255,0.06); margin: 24px 0; }
+
+.nav { display: flex; align-items: center; justify-content: space-between; }
+.nav-logo { display: flex; align-items: center; gap: 10px; }
+.nav-wm { font-size: 17px; color: #F4F4F5; }
+.nav-link { font-size: 13px; color: #71717A; font-family: 'Helvetica Neue', sans-serif; font-weight: 300; }
+.nav-links { display: flex; gap: 24px; }
+.nav-cta {
+  font-size: 13px; font-weight: 500;
+  background: #F4F4F5; color: #1D1D1F;
+  padding: 8px 16px; border-radius: 8px;
+  font-family: 'Helvetica Neue', sans-serif;
+}
+</style>
+</head>
+<body>
+
+<!-- 01 AVENIR (nativo macOS/iOS) -->
+<div class="card">
+  <span class="tag">01 · Avenir Next · Light — nativo Mac/iPhone</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm" style="font-family:'Avenir Next','Avenir',sans-serif;font-weight:300">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm" style="font-family:'Avenir Next','Avenir',sans-serif;font-weight:500">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 02 AVENIR Regular -->
+<div class="card">
+  <span class="tag">02 · Avenir Next · Regular — nativo Mac/iPhone</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm" style="font-family:'Avenir Next','Avenir',sans-serif;font-weight:400">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm" style="font-family:'Avenir Next','Avenir',sans-serif;font-weight:500">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 03 OPTIMA -->
+<div class="card">
+  <span class="tag">03 · Optima · Regular — elegante, mix serif/sans — nativo Mac</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm" style="font-family:'Optima','Optima Nova',sans-serif;font-weight:400">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm" style="font-family:'Optima',sans-serif;font-weight:400">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 04 GILL SANS -->
+<div class="card">
+  <span class="tag">04 · Gill Sans · Light — British, elegante — nativo Mac</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm" style="font-family:'Gill Sans','Gill Sans MT',sans-serif;font-weight:300">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm" style="font-family:'Gill Sans',sans-serif;font-weight:400">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 05 FUTURA -->
+<div class="card">
+  <span class="tag">05 · Futura · Light — geometrico classico — nativo Mac</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm" style="font-family:'Futura','Century Gothic',sans-serif;font-weight:300">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm" style="font-family:'Futura','Century Gothic',sans-serif;font-weight:400">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 06 SF Pro (sistema Apple) -->
+<div class="card">
+  <span class="tag">06 · SF Pro · System font Apple — come le app iOS/Mac</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm" style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',sans-serif;font-weight:300">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm" style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-weight:500">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+<!-- 07 HELVETICA NEUE -->
+<div class="card">
+  <span class="tag">07 · Helvetica Neue · Light — classico premium</span>
+  <div class="brand">
+    <div class="icon"><svg width="28" height="32" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.2"/></svg></div>
+    <div class="wm" style="font-family:'Helvetica Neue','Helvetica',sans-serif;font-weight:300">Augiva</div>
+  </div>
+  <div class="sep"></div>
+  <div class="nav">
+    <div class="nav-logo">
+      <div class="icon-sm"><svg width="14" height="17" viewBox="0 0 26 30" fill="none"><path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/><line x1="6" y1="21" x2="20" y2="21" stroke="#2563EB" stroke-width="2.5"/></svg></div>
+      <span class="nav-wm" style="font-family:'Helvetica Neue',sans-serif;font-weight:400">Augiva</span>
+    </div>
+    <div class="nav-links"><span class="nav-link">Come funziona</span><span class="nav-link">Prezzi</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="nav-link">Accedi</span><div class="nav-cta">Inizia la prova →</div></div>
+  </div>
+</div>
+
+</body>
+</html>
