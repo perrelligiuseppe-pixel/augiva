@@ -1,75 +1,84 @@
 'use client'
 
-import ScoreBadge from './ScoreBadge'
+import { useMemo } from 'react'
+
+function daysLeft(scadenza) {
+  if (!scadenza || scadenza === 'Sempre aperto') return null
+  try {
+    const diff = new Date(scadenza) - new Date()
+    return Math.ceil(diff / (1000 * 60 * 60 * 24))
+  } catch { return null }
+}
+
+function formatDate(scadenza) {
+  if (!scadenza || scadenza === 'Sempre aperto') return 'Sempre aperto'
+  try {
+    return new Date(scadenza).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })
+  } catch { return scadenza }
+}
 
 export default function TenderCard({ tender }) {
   const { titolo, ente, score, importo, scadenza, link, tipo } = tender
+  const days = useMemo(() => daysLeft(scadenza), [scadenza])
+
+  const ringColor = score >= 80 ? '#34C759' : score >= 65 ? '#3B82F6' : '#FF9F0A'
+  const ringLabel = score >= 80 ? 'Alta' : score >= 65 ? 'Media' : 'Buona'
 
   return (
-    <div
-      style={{
-        background: '#FFFFFF',
-        borderRadius: '16px',
-        padding: '20px 24px',
-        boxShadow: '0 2px 20px rgba(0,0,0,0.06)',
-        border: '1px solid rgba(0,0,0,0.04)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-        transition: 'box-shadow 0.2s ease',
-      }}
-      onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 32px rgba(0,0,0,0.10)'}
-      onMouseLeave={e => e.currentTarget.style.boxShadow = '0 2px 20px rgba(0,0,0,0.06)'}
+    <div style={{
+      background: '#3A3A45',
+      borderRadius: '12px',
+      border: '1px solid rgba(255,255,255,0.09)',
+      padding: '14px 16px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '14px',
+      marginBottom: '8px',
+      transition: 'background .15s',
+    }}
+    onMouseEnter={e => e.currentTarget.style.background = '#404050'}
+    onMouseLeave={e => e.currentTarget.style.background = '#3A3A45'}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
-        <div style={{ flex: 1 }}>
-          <p style={{ fontSize: '11px', fontWeight: '600', color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>
-            {tipo === 'appalto' ? '📋 Gara d\'appalto' : '💰 Fondo / Agevolazione'}
-          </p>
-          <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1D1D1F', lineHeight: '1.4', margin: 0 }}>
-            {titolo}
-          </h3>
-          {ente && (
-            <p style={{ fontSize: '13px', color: '#6E6E73', marginTop: '4px' }}>{ente}</p>
-          )}
+      {/* Score ring */}
+      <div style={{
+        width: '52px', height: '52px', borderRadius: '50%',
+        border: `3px solid ${ringColor}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexShrink: 0, flexDirection: 'column',
+        background: `${ringColor}18`,
+      }}>
+        <span style={{ fontSize: '13px', fontWeight: '800', color: ringColor, lineHeight: 1 }}>{score}%</span>
+      </div>
+
+      {/* Info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: '14px', fontWeight: '600', color: '#F4F4F5', lineHeight: 1.35, marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {titolo}
         </div>
-        <ScoreBadge score={score} />
+        <div style={{ fontSize: '12px', color: '#A1A1AA' }}>
+          {ente && <span>{ente}</span>}
+          {ente && scadenza && <span style={{ margin: '0 6px', opacity: .4 }}>·</span>}
+          {scadenza && <span>Scadenza {formatDate(scadenza)}</span>}
+        </div>
       </div>
 
-      <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+      {/* Importo + giorni */}
+      <div style={{ textAlign: 'right', flexShrink: 0 }}>
         {importo && (
-          <div>
-            <p style={{ fontSize: '11px', color: '#6E6E73', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Importo</p>
-            <p style={{ fontSize: '15px', fontWeight: '600', color: '#1D1D1F' }}>{importo}</p>
-          </div>
+          <div style={{ fontSize: '14px', fontWeight: '700', color: '#F4F4F5', marginBottom: '2px' }}>{importo}</div>
         )}
-        {scadenza && (
-          <div>
-            <p style={{ fontSize: '11px', color: '#6E6E73', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Scadenza</p>
-            <p style={{ fontSize: '15px', fontWeight: '600', color: scadenza === 'Sempre aperto' ? '#34C759' : '#1D1D1F' }}>
-              {scadenza}
-            </p>
+        {days !== null && (
+          <div style={{ fontSize: '12px', fontWeight: '600', color: days <= 15 ? '#FF9F0A' : '#A1A1AA' }}>
+            {days > 0 ? `${days} giorni` : 'Scaduto'}
           </div>
         )}
       </div>
 
+      {/* CTA */}
       {link && (
-        <a
-          href={link}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '13px',
-            fontWeight: '600',
-            color: '#2563EB',
-            textDecoration: 'none',
-            marginTop: '4px',
-          }}
-        >
-          Approfondisci →
+        <a href={link} target="_blank" rel="noopener noreferrer"
+          style={{ fontSize: '13px', fontWeight: '600', color: '#F4F4F5', whiteSpace: 'nowrap', background: 'rgba(255,255,255,0.08)', padding: '7px 12px', borderRadius: '8px', flexShrink: 0, textDecoration: 'none' }}>
+          Vedi →
         </a>
       )}
     </div>
