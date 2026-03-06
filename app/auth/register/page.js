@@ -57,16 +57,19 @@ export default function RegisterPage() {
       if (!res.ok) {
         setError(d.error || 'P.IVA non valida.')
       } else if (d.ragioneSociale) {
-        // Trovata in VIES → auto-fill completo
+        // Auto-fill completo da openapi.com o VIES
         setForm(f => ({
           ...f,
           ragioneSociale: d.ragioneSociale,
+          pec: d.pec || f.pec || '',
+          ateco: d.atecoCode ? `${d.atecoCode} — ${d.atecoDescrizione}` : f.ateco || '',
           regione: d.regione || f.regione,
+          capacitaFinanziaria: d.capacitaFinanziaria || f.capacitaFinanziaria || '',
         }))
         setPivaOk(true)
         setError('')
       } else {
-        // Valida ma non in VIES → PMI italiana, compila manualmente
+        // Valida ma non trovata → compila manualmente
         setPivaOk(true)
         setError('')
       }

@@ -1,4 +1,3 @@
-// Validazione algoritmica checksum P.IVA italiana
 function validaPIVA(piva) {
   if (piva.length !== 11 || !/^\d+$/.test(piva)) return false
   let s = 0
@@ -10,6 +9,15 @@ function validaPIVA(piva) {
   return (10 - s % 10) % 10 === parseInt(piva[10])
 }
 
+// Deriva capacità finanziaria dal fatturato
+function capacitaFinanziaria(turnover) {
+  if (!turnover) return ''
+  if (turnover < 100000) return 'sotto_100k'
+  if (turnover < 500000) return '100k_500k'
+  if (turnover < 2000000) return '500k_2m'
+  return 'oltre_2m'
+}
+
 const OPENAPI_TOKEN = '69aaf0133d71430e710bc757'
 
 export async function GET(request) {
@@ -19,35 +27,38 @@ export async function GET(request) {
   if (!piva || piva.length !== 11) {
     return Response.json({ error: 'Inserisci 11 cifre' }, { status: 400 })
   }
-
   if (!validaPIVA(piva)) {
     return Response.json({ error: 'P.IVA non valida (codice di controllo errato)' }, { status: 400 })
   }
 
-  // 1. openapi.com Company API — copre tutte le P.IVA italiane
+  // 1. openapi.com IT-advanced — dati completi
   try {
     const res = await fetch(
-      `https://company.openapi.com/IT-start/${piva}`,
-      { headers: { Authorization: `Bearer ${OPENAPI_TOKEN}` }, signal: AbortSignal.timeout(6000) }
+      `https://company.openapi.com/IT-advanced/${piva}`,
+      { headers: { Authorization: `Bearer ${OPENAPI_TOKEN}` }, signal: AbortSignal.timeout(8000) }
     )
     if (res.ok) {
       const json = await res.json()
-      // Prende la prima azienda ATTIVA
       const aziende = json.data || []
       const azienda = aziende.find(a => a.activityStatus === 'ATTIVA') || aziende[0]
       if (azienda) {
         const addr = azienda.address?.registeredOffice || {}
-        const regione = addr.region?.description || ''
-        const citta = addr.town || ''
-        const provincia = addr.province || ''
-        const cap = addr.zipCode || ''
+        const ateco = azienda.atecoClassification?.ateco2022 || azienda.atecoClassification?.ateco || {}
+        const bilancio = azienda.balanceSheets?.last || {}
         return Response.json({
           ragioneSociale: azienda.companyName || '',
-          regione,
-          citta,
-          provincia,
-          cap,
+          pec: azienda.pec || '',
+          atecoCode: ateco.code || '',
+          atecoDescrizione: ateco.description || '',
+          formaGiuridica: azienda.detailedLegalForm?.description || '',
+          regione: addr.region?.description || '',
+          citta: addr.town || '',
+          provincia: addr.province || '',
+          cap: addr.zipCode || '',
           sdiCode: azienda.sdiCode || '',
+          dipendenti: bilancio.employees || null,
+          fatturato: bilancio.turnover || null,
+          capacitaFinanziaria: capacitaFinanziaria(bilancio.turnover),
           status: azienda.activityStatus,
           fonte: 'openapi.com',
           isValid: true,
@@ -56,7 +67,7 @@ export async function GET(request) {
     }
   } catch {}
 
-  // 2. Fallback VIES per aziende EU non nel registro italiano
+  // 2. Fallback VIES
   try {
     const res = await fetch(
       `https://ec.europa.eu/taxation_customs/vies/rest-api/ms/IT/vat/${piva}`,
@@ -77,6 +88,6 @@ export async function GET(request) {
     }
   } catch {}
 
-  // 3. P.IVA valida ma non trovata
+  // 3. Valida ma non trovata
   return Response.json({ isValid: true, found: false, message: 'P.IVA valida — completa i dati manualmente' })
 }
