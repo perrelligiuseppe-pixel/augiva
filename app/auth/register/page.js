@@ -51,37 +51,22 @@ export default function RegisterPage() {
     if (form.piva.length < 11) return
     setPivaLoading(true)
     try {
-      // VIES — API ufficiale EU, gratuita, nessun account richiesto
-      const res = await fetch(
-        `https://ec.europa.eu/taxation_customs/vies/rest-api/ms/IT/vat/${form.piva}`,
-        { headers: { Accept: 'application/json' } }
-      )
-      if (res.ok) {
-        const d = await res.json()
-        if (d.isValid && d.name && d.name !== '---') {
-          // Estrai regione dall'indirizzo (ultima riga = "CAP CITTÀ SIGLA")
-          let regione = ''
-          if (d.address && d.address !== '---') {
-            const lines = d.address.trim().split('\n').filter(Boolean)
-            if (lines.length > 0) {
-              const lastLine = lines[lines.length - 1].trim()
-              // Formato: "CAP CITTÀ SIGLA" → estrai sigla provincia
-              const match = lastLine.match(/\b([A-Z]{2})$/)
-              if (match) regione = match[1]
-            }
-          }
-          setForm(f => ({
-            ...f,
-            ragioneSociale: d.name !== '---' ? d.name : f.ragioneSociale,
-            regione: regione || f.regione,
-          }))
-          setPivaOk(true)
-        } else {
-          setError('P.IVA non trovata o non valida nel registro europeo.')
-        }
+      // Proxy interno → evita CORS, chiama VIES EU lato server
+      const res = await fetch(`/api/lookup-piva?piva=${form.piva}`)
+      const d = await res.json()
+      if (res.ok && d.ragioneSociale) {
+        setForm(f => ({
+          ...f,
+          ragioneSociale: d.ragioneSociale || f.ragioneSociale,
+          regione: d.regione || f.regione,
+        }))
+        setPivaOk(true)
+        setError('')
+      } else {
+        setError(d.error || 'P.IVA non trovata — puoi compilare i campi manualmente.')
       }
     } catch (e) {
-      setError('Errore durante la verifica. Compila i campi manualmente.')
+      setError('Verifica non disponibile — compila i campi manualmente.')
     }
     setPivaLoading(false)
   }
