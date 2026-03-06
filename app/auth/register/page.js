@@ -51,15 +51,38 @@ export default function RegisterPage() {
     if (form.piva.length < 11) return
     setPivaLoading(true)
     try {
-      const res = await fetch(`https://api.openapi.com/v1/vat/it/${form.piva}`, {
-        headers: { Accept: 'application/json' }
-      })
+      // VIES — API ufficiale EU, gratuita, nessun account richiesto
+      const res = await fetch(
+        `https://ec.europa.eu/taxation_customs/vies/rest-api/ms/IT/vat/${form.piva}`,
+        { headers: { Accept: 'application/json' } }
+      )
       if (res.ok) {
         const d = await res.json()
-        setForm(f => ({ ...f, ragioneSociale: d.name || f.ragioneSociale, ateco: d.ateco || f.ateco, pec: d.pec || f.pec }))
-        setPivaOk(true)
+        if (d.isValid && d.name && d.name !== '---') {
+          // Estrai regione dall'indirizzo (ultima riga = "CAP CITTÀ SIGLA")
+          let regione = ''
+          if (d.address && d.address !== '---') {
+            const lines = d.address.trim().split('\n').filter(Boolean)
+            if (lines.length > 0) {
+              const lastLine = lines[lines.length - 1].trim()
+              // Formato: "CAP CITTÀ SIGLA" → estrai sigla provincia
+              const match = lastLine.match(/\b([A-Z]{2})$/)
+              if (match) regione = match[1]
+            }
+          }
+          setForm(f => ({
+            ...f,
+            ragioneSociale: d.name !== '---' ? d.name : f.ragioneSociale,
+            regione: regione || f.regione,
+          }))
+          setPivaOk(true)
+        } else {
+          setError('P.IVA non trovata o non valida nel registro europeo.')
+        }
       }
-    } catch {}
+    } catch (e) {
+      setError('Errore durante la verifica. Compila i campi manualmente.')
+    }
     setPivaLoading(false)
   }
 
@@ -168,7 +191,7 @@ export default function RegisterPage() {
                   {pivaLoading ? '...' : pivaOk ? '✓ Verificata' : 'Verifica →'}
                 </button>
               </div>
-              {pivaOk && <p style={{ fontSize: '12px', color: '#34C759', marginBottom: '12px' }}>✓ Dati azienda compilati automaticamente</p>}
+              {pivaOk && <p style={{ fontSize: '12px', color: '#34C759', marginBottom: '12px' }}>✓ Ragione sociale verificata — completa ATECO e PEC</p>}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div>
