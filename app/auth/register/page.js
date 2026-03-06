@@ -267,7 +267,7 @@ export default function RegisterPage() {
             </button>
 
             <p style={{ textAlign: 'center', fontSize: '12px', color: '#71717A', marginTop: '-8px' }}>
-              Nessun addebito per 30 giorni. Disdici prima e non paghi nulla.
+              Nessun addebito per 15 giorni. Disdici prima e non paghi nulla.
             </p>
             <p style={{ textAlign: 'center', fontSize: '14px', color: '#71717A' }}>
               Hai già un account?{' '}
