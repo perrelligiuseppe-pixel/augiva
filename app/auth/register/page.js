@@ -109,8 +109,11 @@ export default function RegisterPage() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-            <div style={{ width: '38px', height: '38px', background: '#2563EB', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'white', fontSize: '18px', fontWeight: '800' }}>A</span>
+            <div style={{ width: '38px', height: '38px', background: '#059669', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="16" height="19" viewBox="0 0 26 30" fill="none">
+              <path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/>
+              <line x1="6" y1="21" x2="20" y2="21" stroke="#059669" strokeWidth="2.5"/>
+            </svg>
             </div>
             <span style={{ fontSize: '18px', fontWeight: '700', color: '#F4F4F5' }}>Augiva</span>
           </Link>
