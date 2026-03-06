@@ -1,0 +1,15 @@
+[Unit]
+Description=Augiva Matching Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/augiva-backend
+ExecStart=/usr/bin/python3 /root/augiva-backend/daemon.py
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
