@@ -54,19 +54,24 @@ export default function RegisterPage() {
       // Proxy interno → evita CORS, chiama VIES EU lato server
       const res = await fetch(`/api/lookup-piva?piva=${form.piva}`)
       const d = await res.json()
-      if (res.ok && d.ragioneSociale) {
+      if (!res.ok) {
+        setError(d.error || 'P.IVA non valida.')
+      } else if (d.ragioneSociale) {
+        // Trovata in VIES → auto-fill completo
         setForm(f => ({
           ...f,
-          ragioneSociale: d.ragioneSociale || f.ragioneSociale,
+          ragioneSociale: d.ragioneSociale,
           regione: d.regione || f.regione,
         }))
         setPivaOk(true)
         setError('')
       } else {
-        setError(d.error || 'P.IVA non trovata — puoi compilare i campi manualmente.')
+        // Valida ma non in VIES → PMI italiana, compila manualmente
+        setPivaOk(true)
+        setError('')
       }
     } catch (e) {
-      setError('Verifica non disponibile — compila i campi manualmente.')
+      setError('Verifica non disponibile — puoi continuare manualmente.')
     }
     setPivaLoading(false)
   }
