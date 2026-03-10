@@ -94,7 +94,11 @@ export default function RegisterPage() {
     if (!form.piva || !form.ragioneSociale) return setError('P.IVA e ragione sociale sono obbligatori.')
     setLoading(true)
     try {
-      const { data, error: signUpErr } = await supabase.auth.signUp({ email: form.email, password: form.password })
+      const { data, error: signUpErr } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: { emailRedirectTo: 'https://app.augiva.com/auth/callback' }
+      })
       if (signUpErr) throw new Error(signUpErr.message)
       if (data?.user?.identities?.length === 0) throw new Error('Email già registrata. Prova ad accedere.')
       await supabase.from('companies').insert({
@@ -106,7 +110,12 @@ export default function RegisterPage() {
         capacita_finanziaria: form.capacita,
         status: 'pending'
       })
-      router.push('/dashboard')
+      // Se session è null → email di conferma inviata, mostra messaggio
+      if (!data.session) {
+        router.push('/auth/check-email?email=' + encodeURIComponent(form.email))
+      } else {
+        router.push('/dashboard')
+      }
     } catch (err) { setError(err.message) }
     setLoading(false)
   }
