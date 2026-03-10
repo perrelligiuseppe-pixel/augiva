@@ -38,7 +38,7 @@ export default function DashboardPage() {
 
   const loadCompany = async (userId) => {
     const { data } = await supabase.from('companies').select('*').eq('user_id', userId).order('created_at', { ascending: false }).limit(1).single()
-    if (!data) { setLoading(false); return }
+    if (!data) { setLoading(false); setCompany(null); return }
     setCompany(data)
     if (['active', 'matched'].includes(data.status)) await loadMatches(data.id)
     setLoading(false)
@@ -75,7 +75,7 @@ export default function DashboardPage() {
     setFondi(mapped.filter(m => ['fondo', 'contributo', 'finanziamento', 'grant'].includes(m.tipo?.toLowerCase())))
   }
 
-  const isPending = !company || ['pending', 'processing'].includes(company?.status)
+  const isPending = company && ['pending', 'processing'].includes(company?.status)
   const totale = appalti.length + fondi.length
   const avgScore = totale > 0 ? Math.round([...appalti, ...fondi].reduce((s, m) => s + m.score, 0) / totale) : 0
   const weekNum = Math.ceil((new Date() - new Date(new Date().getFullYear(), 0, 1)) / (7 * 86400000))
