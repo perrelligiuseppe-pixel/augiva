@@ -110,17 +110,23 @@ export default function DashboardPage() {
       {/* Navbar */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(50,50,60,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '0 32px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: 32, height: 32, background: '#3B82F6', borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ color: '#fff', fontWeight: '800', fontSize: '14px' }}>A</span>
+          <div style={{ width: 34, height: 34, background: '#059669', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="14" height="17" viewBox="0 0 26 30" fill="none">
+              <path d="M13 1 L25 29 H19.5 L13 12 L6.5 29 H1 L13 1Z" fill="white"/>
+              <line x1="6" y1="21" x2="20" y2="21" stroke="#059669" strokeWidth="2.5"/>
+            </svg>
           </div>
-          <span style={{ fontSize: 16, fontWeight: 700, color: '#F4F4F5' }}>
-            {company?.ragione_sociale || 'Augiva'}
-          </span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: '#F4F4F5' }}>Augiva</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: '#FF9F0A', background: 'rgba(255,159,10,0.15)', border: '1px solid rgba(255,159,10,0.3)', padding: '4px 10px', borderRadius: 20 }}>
             ✦ Prova gratuita
           </span>
+          <button
+            onClick={() => router.push('/dashboard/profilo')}
+            style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F5', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '9px', cursor: 'pointer', padding: '7px 14px', fontFamily: 'inherit' }}>
+            ⚙️ Profilo
+          </button>
           <button
             onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
             style={{ fontSize: 14, color: '#A1A1AA', background: 'transparent', border: 'none', cursor: 'pointer', padding: '8px 12px', fontFamily: 'inherit' }}>
@@ -134,6 +140,11 @@ export default function DashboardPage() {
 
         {/* Heading */}
         <div style={{ marginBottom: '32px' }}>
+          {company?.ragione_sociale && (
+            <p style={{ fontSize: '14px', fontWeight: '600', color: '#059669', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              {company.ragione_sociale}
+            </p>
+          )}
           <h1 style={{ fontSize: '28px', fontWeight: '900', color: '#F4F4F5', margin: '0 0 8px', letterSpacing: '-0.5px' }}>
             Le tue opportunità 🎯
           </h1>
