@@ -46,7 +46,7 @@ export default function DashboardPage() {
     }
 
     setCompany(data)
-    if (data.status === 'matched') {
+    if (data.status === 'matched' || data.status === 'active') {
       await loadMatches(data.id)
     }
     setLoading(false)
