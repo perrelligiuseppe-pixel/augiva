@@ -124,13 +124,12 @@ export default function DashboardPage() {
           importo: m.tenders.importo || m.tenders.estimated_value,
           scadenza: m.tenders.scadenza || m.tenders.deadline_date,
           tipo: m.tenders.tipo || m.tenders.type,
-          source: m.tenders.source,
           link: m.tenders.link || m.tenders.url,
           sintesi: m.tenders.description,
           regioni: m.tenders.region ? m.tenders.region.split(', ') : null,
         }))
       setAppalti(mapped.filter(m => m.tipo === 'appalto'))
-      setFondi(mapped.filter(m => m.tipo !== 'appalto'))
+      setFondi(mapped.filter(m => m.tipo === 'fondo'))
     }
   }
 

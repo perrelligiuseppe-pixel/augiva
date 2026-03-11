@@ -25,24 +25,11 @@ function formatScadenza(scadenza, tipo) {
 }
 
 export default function TenderCard({ tender }) {
-  const { titolo, ente, score, importo, scadenza, link, tipo, source, sintesi, regioni } = tender
+  const { titolo, ente, score, importo, scadenza, link, tipo, sintesi, regioni } = tender
 
   const importoFmt = formatImporto(importo)
   const scadenzaFmt = formatScadenza(scadenza, tipo)
   const tipoLabel = tipo === 'appalto' ? '📋 Gara d\'appalto' : '💰 Fondo / Agevolazione'
-  const sourceLabel = {
-    'TED': 'EU TED',
-    'MIMIT': 'MIMIT',
-    'INVITALIA': 'Invitalia',
-    'SIMEST': 'SIMEST',
-    'PNRR': 'PNRR',
-    'ANAC': 'ANAC',
-    'MEPA': 'MEPA',
-    'SICILIA': 'Regione Sicilia',
-    'LAZIO': 'Regione Lazio',
-    'CCIAA': 'CCIAA',
-    'UNIONCAMERE': 'Unioncamere',
-  }[source] || source
 
   const scadenzaColor = typeof scadenzaFmt === 'object' && scadenzaFmt?.urgent
     ? '#FF9F0A'
@@ -85,19 +72,6 @@ export default function TenderCard({ tender }) {
             textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px'
           }}>
             {tipoLabel}
-            {sourceLabel && (
-              <span style={{
-                fontSize: 11,
-                fontWeight: 600,
-                color: 'var(--text-secondary)',
-                background: 'rgba(255,255,255,0.06)',
-                borderRadius: 6,
-                padding: '2px 8px',
-                marginLeft: 4,
-              }}>
-                {sourceLabel}
-              </span>
-            )}
           </p>
           <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', lineHeight: '1.4', margin: 0 }}>
             {titolo}
