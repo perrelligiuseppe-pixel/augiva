@@ -18,7 +18,7 @@ from datetime import datetime
 # Path setup
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from matching.ateco_cpv_map import ATECO_TO_CPV, SECTOR_KEYWORDS, REGIONE_TO_PROVINCE
+from matching.ateco_cpv_map import ATECO_TO_CPV, SECTOR_KEYWORDS, REGIONE_TO_PROVINCE, ATECO_NEGATIVE_KEYWORDS
 
 logger = logging.getLogger(__name__)
 
@@ -61,10 +61,10 @@ class MatchingEngine:
     """
 
     # Pesi per il calcolo dello score finale (livello 1)
-    WEIGHT_CPV = 0.35
-    WEIGHT_KEYWORD = 0.40
-    WEIGHT_GEO = 0.10
-    WEIGHT_VALUE = 0.15
+    WEIGHT_CPV = 0.30
+    WEIGHT_KEYWORD = 0.35
+    WEIGHT_GEO = 0.25
+    WEIGHT_VALUE = 0.10
 
     # Soglia minima valore bando
     MIN_VALUE_EUR = 5_000
@@ -226,29 +226,69 @@ class MatchingEngine:
 
         return min(base_score, 1.0)
 
+    # Mappa zone operative → regioni
+    ZONE_TO_REGIONI = {
+        'sud italia': ['Campania','Sicilia','Puglia','Calabria','Basilicata','Molise','Sardegna','Abruzzo'],
+        'nord italia': ['Lombardia','Piemonte','Veneto','Liguria','Emilia-Romagna','Friuli-Venezia Giulia',"Valle d'Aosta",'Trentino-Alto Adige'],
+        'centro italia': ['Toscana','Lazio','Umbria','Marche'],
+        'nord-ovest': ['Lombardia','Piemonte','Liguria',"Valle d'Aosta"],
+        'nord-est': ['Veneto','Emilia-Romagna','Friuli-Venezia Giulia','Trentino-Alto Adige'],
+        'italia': None,  # tutto il paese
+        'nazionale': None,
+    }
+
     def _score_geo(self, company: dict, tender: dict) -> float:
         tender_region = tender.get('region')
         company_regione = str(company.get('regione', '') or '').strip()
         company_provincia = str(company.get('provincia', '') or '').strip()
+        zone_op = str(company.get('zone_operative', '') or '').strip().lower()
 
+        # Bando nazionale/senza regione → score neutro (non è un plus né un minus)
         if not tender_region:
+            return 0.5
+
+        tender_region_lower = tender_region.lower()
+
+        # Match diretto sulla regione dell'azienda
+        if company_regione and company_regione.lower() in tender_region_lower:
             return 1.0
 
-        if company_regione and company_regione.lower() in str(tender_region).lower():
-            return 1.0
+        # Match su zone_operative (es. "Sud Italia" include Campania, Sicilia, ecc.)
+        for zona_key, regioni in self.ZONE_TO_REGIONI.items():
+            if zona_key in zone_op:
+                if regioni is None:
+                    return 0.8  # zone_op è "Italia" → tutto va bene
+                if tender_region in regioni:
+                    return 0.95  # bando nella zona operativa dell'azienda
+                else:
+                    return 0.15  # bando FUORI dalla zona operativa → forte penalità
 
+        # Fallback: province
         if company_provincia:
             allowed_provinces = REGIONE_TO_PROVINCE.get(company_regione, [])
-            if any(p.lower() in str(tender_region).lower() for p in allowed_provinces):
+            if any(p.lower() in tender_region_lower for p in allowed_provinces):
                 return 0.8
 
+        # Controlla nel titolo
         title = str(tender.get('title', '') or '').lower()
         if company_regione and company_regione.lower() in title:
             return 0.9
-        if company_provincia and company_provincia.lower() in title:
-            return 0.85
 
-        return 0.3
+        # Regioni diverse, nessuna corrispondenza
+        # Eccezione: settori ad operatività naturalmente nazionale
+        ateco_raw = str(company.get('ateco', '') or '').strip()
+        settori_raw = [s.lower() for s in (company.get('settori') or [])]
+        is_national_sector = (
+            ateco_raw.startswith('49') or  # trasporti
+            ateco_raw.startswith('50') or  # trasporto acqua
+            ateco_raw.startswith('51') or  # trasporto aereo
+            ateco_raw.startswith('52') or  # magazzinaggio e logistica
+            ateco_raw.startswith('53') or  # poste e corrieri
+            any(s in settori_raw for s in ['trasporti','logistica','autotrasporto','corriere','spedizioni'])
+        )
+        if is_national_sector:
+            return 0.6  # score neutro-positivo: può operare ovunque
+        return 0.2
 
     def _score_value(self, company: dict, tender: dict) -> float:
         value = tender.get('estimated_value')
@@ -354,7 +394,7 @@ class MatchingEngine:
             logger.error(f"Errore embedding: {e}")
             return None
 
-    def score_tender_l2_pgvector(self, company: dict, top_k: int = 20) -> list:
+    def score_tender_l2_pgvector(self, company: dict, top_k: int = 20, tipo: str = None) -> list:
         """
         Livello 2 — pgvector native query.
 
@@ -383,7 +423,17 @@ class MatchingEngine:
             conn = _get_db_conn()
             cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-            query = """
+            # tipo='fondo' → filtra tutto ciò che NON è appalto
+            if tipo == 'fondo':
+                tipo_filter = "AND tipo != 'appalto'"
+                params = (vec_str, top_k)
+            elif tipo:
+                tipo_filter = "AND tipo = %s"
+                params = (vec_str, tipo, top_k)
+            else:
+                tipo_filter = ""
+                params = (vec_str, top_k)
+            query = f"""
                 SELECT
                     id,
                     title,
@@ -391,13 +441,15 @@ class MatchingEngine:
                     cpv_codes,
                     region,
                     estimated_value,
+                    tipo,
                     1 - (embedding <=> %s::vector) AS similarity
                 FROM tenders
-                WHERE embedding IS NOT NULL
+                WHERE embedding IS NOT NULL AND (status = 'active' OR status IS NULL)
+                {tipo_filter}
                 ORDER BY similarity DESC
                 LIMIT %s
             """
-            cur.execute(query, (vec_str, top_k))
+            cur.execute(query, params)
             rows = cur.fetchall()
             conn.close()
 
@@ -413,6 +465,8 @@ class MatchingEngine:
                     'cpv_codes': row.get('cpv_codes'),
                     'region': row.get('region'),
                     'estimated_value': row.get('estimated_value'),
+                    'tipo': row.get('tipo', 'appalto'),
+                    'target_profilo': row.get('target_profilo', 'tutti'),
                     'similarity': round(sim, 4),
                     'score_l2': score_l2,
                 })
@@ -458,10 +512,101 @@ class MatchingEngine:
         result_l1 = self.score_tender_l1(company, tender)
         l1 = result_l1['score']
 
+        # Per i fondi (Invitalia, MIMIT, SIMEST, PNRR) L1 è irrilevante:
+        # i fondi non hanno CPV codes né keyword settoriali.
+        # Usiamo 100% L2 semantico per i fondi, L1+L2 per gli appalti.
+        tender_tipo = tender.get('tipo', 'appalto')
         if semantic_score is not None:
-            final = round(l1 * 0.4 + semantic_score * 0.6, 1)
+            if tender_tipo == 'fondo':
+                final = round(semantic_score, 1)  # 100% semantico per fondi
+            else:
+                final = round(l1 * 0.4 + semantic_score * 0.6, 1)  # 40% L1 + 60% L2
         else:
             final = l1
+
+        # Penalità settori incompatibili (per fondi con settore specifico diverso)
+        if tender_tipo == 'fondo':
+            title_low = str(tender.get('title', '') or '').lower()
+            desc_low = str(tender.get('description', '') or '').lower()
+            full_text = title_low + ' ' + desc_low
+            ateco_co = str(company.get('ateco', '') or '').strip()
+
+            # Settori con keyword esclusive — se presente nel bando ma azienda non è in quel settore
+            INCOMPATIBLE_SECTORS = {
+                'aerospaziale': ['aerospaziale', 'aeronautic', 'satellit', 'spaziale', 'aviazion'],
+                'farmaceutico': ['farmaceut', 'medicinali', 'farmaci', 'dispositivi medici', 'pharma'],
+                'cultura_cinema': ['audiovisiv', 'cinematograf', 'cinema', 'teatro', 'musei di impresa', 'museo', 'carnevalе'],
+                'marchi_design': ['marchi collettivi', 'marchio collettivo', 'marchi+ 2025', 'promozione marchi'],
+                'commercio_equo': ['commercio equo', 'equo solidale'],
+                'semiconduttori': ['semiconduttori', 'microelettronica', 'chip'],
+                'siderurgico': ['ilva', 'siderurgico', 'acciaio', 'acciaierie'],
+                'nucleare': ['nucleare', 'reattore', 'fissione'],
+            }
+            # Settori compatibili con azienda (basato su ATECO/settori dichiarati)
+            settori_co = [s.lower() for s in (company.get('settori') or [])]
+            ateco_prefix = ateco_co[:2] if ateco_co else ''
+
+            penalty = 0
+            for sector_name, keywords in INCOMPATIBLE_SECTORS.items():
+                if any(kw in full_text for kw in keywords):
+                    # Controlla se l'azienda è in quel settore specifico
+                    is_compatible_sector = any(kw in ' '.join(settori_co) for kw in keywords)
+                    if not is_compatible_sector:
+                        penalty += 10  # -10 per ogni settore incompatibile trovato
+            if penalty > 0:
+                final = max(0, round(final - penalty, 1))
+
+            # Bonus settoriale: se il fondo matcha keyword del settore azienda
+            settori_keywords = company.get('settori') or []
+            if isinstance(settori_keywords, str):
+                settori_keywords = [settori_keywords]
+            import sys, os as _os
+            _os.sys = sys
+            try:
+                from matching.ateco_cpv_map import SECTOR_KEYWORDS
+                bonus = 0
+                for settore in settori_keywords:
+                    kws = SECTOR_KEYWORDS.get(settore.lower(), [settore.lower()])
+                    if any(kw.lower() in full_text for kw in kws):
+                        bonus = 5  # +5 bonus se fondo parla del settore
+                        break
+                if bonus:
+                    final = min(100, round(final + bonus, 1))
+            except Exception:
+                pass
+
+        # Penalità ATECO negative keywords — si applica a tutti i bandi
+        # Se il bando contiene keyword del settore SBAGLIATO per l'ATECO dell'azienda
+        ateco_co = str(company.get('ateco', '') or '').strip()
+        title_low2 = str(tender.get('title', '') or '').lower()
+        desc_low2 = str(tender.get('description', '') or '').lower()
+        full_text2 = title_low2 + ' ' + desc_low2
+
+        neg_penalty = 0
+        for ateco_prefix, neg_keywords in ATECO_NEGATIVE_KEYWORDS.items():
+            if ateco_co.startswith(ateco_prefix):
+                hits = [kw for kw in neg_keywords if kw.lower() in full_text2]
+                if hits:
+                    # Penalità forte: -20 per primo hit, -5 per ognuno successivo
+                    neg_penalty = 20 + (len(hits) - 1) * 5
+                    break
+        if neg_penalty > 0:
+            final = max(0, round(final - neg_penalty, 1))
+
+        # Moltiplicatore hard-geo: se l'azienda ha zone operative definite
+        # e il bando ha una regione fuori dalla zona → abbatti il punteggio
+        if tender_tipo == 'appalto':
+            geo_score = result_l1['components'].get('geo', 50)  # 0-100
+            ateco_raw2 = str(company.get('ateco', '') or '').strip()
+            settori_raw2 = [s.lower() for s in (company.get('settori') or [])]
+            is_mobile_sector = (
+                ateco_raw2.startswith('49') or ateco_raw2.startswith('52') or
+                ateco_raw2.startswith('53') or
+                any(s in settori_raw2 for s in ['trasporti','logistica','autotrasporto','corriere','spedizioni'])
+            )
+            if geo_score <= 20 and not is_mobile_sector:
+                # Penalità geo solo per settori con operatività locale
+                final = round(final * 0.65, 1)
 
         return {
             'score': final,
@@ -470,6 +615,9 @@ class MatchingEngine:
             'components_l1': result_l1['components'],
             'tender_id': tender.get('id'),
             'tender_title': tender.get('title', '')[:100],
+            'target_profilo': tender.get('target_profilo', 'tutti'),
+            'tipo': tender.get('tipo', 'appalto'),
+            'region': tender.get('region'),
         }
 
     # ─────────────────────────────────────────────
@@ -484,7 +632,7 @@ class MatchingEngine:
           1. Genera embedding profilo aziendale
           2. Query pgvector → top-20 semantici
           3. Per ognuno: calcola score combinato L1 + L2
-          4. Filtra: score finale >= 60
+          4. Filtra: score finale >= 65
           5. Ritorna lista ordinata per score desc
 
         Returns:
@@ -492,8 +640,16 @@ class MatchingEngine:
         """
         logger.info(f"match_all() per {company.get('ragione_sociale', 'N/A')}")
 
-        # Step 1 + 2: embedding + pgvector top-20
-        semantic_results = self.score_tender_l2_pgvector(company, top_k=20)
+        # Step 1 + 2: embedding + pgvector — top-20 appalti + top-10 fondi separati
+        semantic_results = self.score_tender_l2_pgvector(company, top_k=300)
+        # Query separata per fondi (assicura che i fondi siano sempre inclusi)
+        semantic_fondi = self.score_tender_l2_pgvector(company, top_k=100, tipo='fondo')
+        # Merge deduplicato
+        seen_ids = {r['id'] for r in semantic_results}
+        for f in semantic_fondi:
+            if f['id'] not in seen_ids:
+                semantic_results.append(f)
+                seen_ids.add(f['id'])
 
         if not semantic_results:
             logger.warning("Nessun risultato semantico — fallback L1 su tutti i bandi")
@@ -504,7 +660,7 @@ class MatchingEngine:
             results = []
             for tender in tenders:
                 full = self.score_tender_full(company, tender)
-                if full['score'] >= 60:
+                if full["score"] >= 65:
                     results.append(full)
             results.sort(key=lambda x: x['score'], reverse=True)
             return results
@@ -519,17 +675,132 @@ class MatchingEngine:
                 'cpv_codes': sem.get('cpv_codes'),
                 'region': sem.get('region'),
                 'estimated_value': sem.get('estimated_value'),
+                'tipo': sem.get('tipo', 'appalto'),
+                'target_profilo': sem.get('target_profilo', 'tutti'),
+                'source': sem.get('source', ''),
             }
             score_l2 = sem['score_l2']
             full = self.score_tender_full(company, tender, semantic_score=score_l2)
-            full['similarity'] = sem['similarity']
+            full['similarity'] = sem.get('similarity', 0.0)
+            full['region'] = tender.get('region')
+            full['tipo'] = tender.get('tipo', 'appalto')
+            full['source'] = tender.get('source', '')
+            full['target_profilo'] = tender.get('target_profilo', 'tutti')
             results.append(full)
 
-        # Step 4: filtra score >= 60
-        results = [r for r in results if r['score'] >= 60]
+        # Step 4: filtri qualità + territorialità stretta
+        regioni_operative = company.get("regioni_operative") or []
+        company_regione = (company.get("regione") or "").strip()
+        if not regioni_operative and company_regione:
+            regioni_operative = [company_regione]
+        regioni_operative_lower = [r.lower() for r in regioni_operative]
 
-        # Step 5: ordina per score desc
+        TARGET_ESCLUSI = {
+            'startup_nuova_impresa', 'autoimpiego', 'nuova_impresa',
+            'disoccupati', 'neo_imprenditore', 'resto_al_sud'
+        }
+        CPV_BLACKLIST_49 = {'60424', '60400', '60410', '50750', '50413'}
+        ateco = (company.get("ateco") or "").strip()
+        is_transport_49 = ateco.startswith("49")
+
+        def cpv_ok(r):
+            if not is_transport_49:
+                return True
+            cpv_codes = r.get('components_l1', {}).get('matched_cpv', []) or []
+            if not cpv_codes:
+                return True
+            ok = [c for c in cpv_codes if not any(str(c).startswith(bl) for bl in CPV_BLACKLIST_49)]
+            return len(ok) > 0 or len(cpv_codes) == 0
+
+        def region_ok(r):
+            bando_region = (r.get("region") or "").strip()
+            if not bando_region or bando_region.lower() in ("nazionale", "n/d", ""):
+                return True
+            if not regioni_operative_lower:
+                return True
+            bando_list = [reg.strip().lower() for reg in bando_region.split(",")]
+            for op in regioni_operative_lower:
+                if any(op in br or br in op for br in bando_list):
+                    return True
+            return False
+
+        def is_compatible(r):
+            tipo = r.get("tipo", "appalto")
+            bando_region = (r.get("region") or "").strip()
+            # Fondi nazionali soglia 63, fondi regionali 68, appalti 68
+            if tipo != "appalto":
+                is_national = not bando_region or bando_region.lower() in ("nazionale", "n/d", "")
+                min_s = 64 if is_national else 68
+            else:
+                min_s = 68
+            if r.get("score", 0) < min_s:
+                return False
+            target = (r.get("target_profilo") or "tutti").lower().replace(" ", "_").replace("-", "_")
+            if any(ex in target for ex in TARGET_ESCLUSI):
+                return False
+            if not region_ok(r):
+                return False
+            if not cpv_ok(r):
+                return False
+            return True
+
+        results = [r for r in results if is_compatible(r)]
+
+        # Supplemento CPV: aggiunge bandi con CPV mappato direttamente dall'ATECO
+        # Garantisce che bandi rilevanti per codice siano sempre inclusi
+        ateco_company = str(company.get('ateco', '') or '').strip()
+        cpv_prefixes_for_ateco = []
+        for prefix_len in range(len(ateco_company), 0, -1):
+            key = ateco_company[:prefix_len]
+            mapped = ATECO_TO_CPV.get(key, [])
+            if mapped:
+                cpv_prefixes_for_ateco = mapped
+                break
+
+        if cpv_prefixes_for_ateco:
+            try:
+                conn_cpv = _get_db_conn()
+                cur_cpv = conn_cpv.cursor()
+                like_clauses = []
+                params_cpv = []
+                for cpv_p in cpv_prefixes_for_ateco:
+                    cpv_clean = cpv_p.replace('.', '')[:4]
+                    like_clauses.append("EXISTS (SELECT 1 FROM unnest(cpv_codes) AS c WHERE c LIKE %s)")
+                    params_cpv.append(f'{cpv_clean}%')
+                if like_clauses:
+                    cur_cpv.execute(f"""
+                        SELECT id::text, title, description, cpv_codes, region,
+                               estimated_value, tipo, target_profilo, source, deadline_date
+                        FROM tenders
+                        WHERE ({' OR '.join(like_clauses)})
+                          AND status = 'active'
+                          AND (deadline_date IS NULL OR deadline_date >= CURRENT_DATE)
+                        LIMIT 50
+                    """, params_cpv)
+                    cpv_rows = cur_cpv.fetchall()
+                    cols_cpv = ['id','title','description','cpv_codes','region','estimated_value','tipo','target_profilo','source','deadline_date']
+                    existing_result_ids = {r.get('tender_id') for r in results}
+                    for row in cpv_rows:
+                        rd = dict(zip(cols_cpv, row))
+                        if rd['id'] in existing_result_ids:
+                            continue  # già presente
+                        # Calcola score con L2=78 (match garantito da CPV)
+                        full = self.score_tender_full(company, rd, semantic_score=78.0)
+                        full['similarity'] = 0.0
+                        full['region'] = rd.get('region')
+                        full['tipo'] = rd.get('tipo', 'appalto')
+                        full['source'] = rd.get('source', '')
+                        full['target_profilo'] = rd.get('target_profilo', 'tutti')
+                        if full['score'] >= 64:  # soglia minima per CPV garantiti
+                            results.append(full)
+                cur_cpv.close()
+                conn_cpv.close()
+            except Exception as e:
+                logger.warning(f"Supplemento CPV post-filter fallito: {e}")
+
+        # Step 5: ordina per score desc, max 20 opportunità (qualità > quantità)
         results.sort(key=lambda x: x['score'], reverse=True)
+        results = results[:20]
         return results
 
     def match_all_sync(self, company: dict) -> list:
@@ -540,7 +811,7 @@ class MatchingEngine:
     # run_batch_matching() — tutte le aziende
     # ─────────────────────────────────────────────
 
-    def run_batch_matching(self, min_score: float = 60.0,
+    def run_batch_matching(self, min_score: float = 65.0,
                            save_to_db: bool = True) -> dict:
         """
         Processa tutte le aziende nel DB con match_all() e salva i risultati.
@@ -571,6 +842,9 @@ class MatchingEngine:
                 results = asyncio.run(self.match_all(company))
 
                 if save_to_db and company_id:
+                    # Prima elimina match obsoleti, poi reinserisce solo i nuovi
+                    sb = self._get_supabase()
+                    sb.table('matches').delete().eq('company_id', company_id).execute()
                     for match in results:
                         if match['score'] >= min_score:
                             self._save_match(
@@ -597,12 +871,14 @@ class MatchingEngine:
         """Salva o aggiorna un match nel DB (ON CONFLICT DO UPDATE)."""
         try:
             sb = self._get_supabase()
+            score_l1 = details.get('score_l1', details.get('l1', 0))
+            score_l2 = details.get('score_l2', details.get('l2', 0))
             sb.table('matches').upsert({
                 'company_id': company_id,
                 'tender_id': tender_id,
-                'score': score,
-                'details': details,
-                'updated_at': datetime.utcnow().isoformat(),
+                'score': round(score, 2),
+                'score_l1': round(score_l1, 2) if score_l1 else None,
+                'score_l2': round(score_l2, 2) if score_l2 else None,
             }, on_conflict='company_id,tender_id').execute()
         except Exception as e:
             logger.error(f"Errore salvataggio match: {e}")

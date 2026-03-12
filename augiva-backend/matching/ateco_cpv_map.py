@@ -33,7 +33,14 @@ ATECO_TO_CPV = {
     "47": ["30", "15"],             # Commercio dettaglio
 
     # --- Trasporti e Logistica ---
-    "49": ["60", "63"],            # Trasporto terrestre
+    "49.1": ["60.2"],                 # Trasporto ferroviario passeggeri
+    "49.2": ["60.2"],                 # Trasporto ferroviario merci
+    "49.3": ["60.1", "60.13", "60.14"],  # Trasporto passeggeri su strada (autobus, taxi)
+    "49.4": ["60.1", "60.18", "63.1"],   # Trasporto merci su strada (camion, corrieri)
+    "49.41": ["60.18", "63.1", "63.12"], # Trasporto merci specifico
+    "49.42": ["60.14"],               # Traslochi
+    "49.5": ["49.5", "63.1"],         # Trasporto tubazioni
+    "49": ["60", "63"],               # Trasporto terrestre (fallback generico)
     "50": ["60.6", "34.7"],        # Trasporto acqua
     "52": ["63.1"],                # Magazzinaggio
 
@@ -115,8 +122,31 @@ SECTOR_KEYWORDS = {
         "pulizia", "pulizie", "igiene", "sanificazione", "disinfezione"
     ],
     "trasporti": [
-        "trasporto", "veicoli", "autobus", "furgoni", "logistica",
-        "spedizioni", "flotta", "carburante", "fuel card"
+        "trasporto", "trasporti", "veicoli", "furgoni", "logistica",
+        "spedizioni", "flotta", "carburante", "fuel card", "autotrasporto",
+        "corriere", "distribuzione", "movimentazione merci", "movimentazione",
+        "autoveicoli", "camion", "semirimorchi", "rimorchi",
+        "noleggio veicoli", "manutenzione veicoli", "revisione veicoli", "pneumatici"
+    ],
+    "trasporto_merci": [
+        "trasporto merci", "trasporto di merci", "autotrasporto", "camion", "tir",
+        "furgoni", "corriere espresso", "spedizioni", "logistica", "distribuzione",
+        "movimentazione merci", "magazzino", "stoccaggio", "supply chain",
+        "flotta veicoli commerciali", "veicoli commerciali", "noleggio furgoni"
+    ],
+    "trasporto_passeggeri": [
+        "trasporto passeggeri", "trasporto di passeggeri", "autobus di linea",
+        "servizi di linea", "mobilità urbana", "trasporto pubblico",
+        "servizi scolastici", "noleggio autobus", "noleggio pullman",
+        "servizi turistici", "taxi", "NCC"
+    ],
+    "logistica": [
+        "logistica", "magazzino", "stoccaggio", "spedizioni", "corriere",
+        "distribuzione", "trasporto merci", "movimentazione", "supply chain"
+    ],
+    "autotrasporto": [
+        "autotrasporto", "trasporto merci su strada", "camion", "tir",
+        "furgoni", "corriere espresso", "distribuzione ultimo miglio"
     ],
     "energie rinnovabili": [
         "energia rinnovabile", "fotovoltaico", "solare", "eolico",
@@ -190,4 +220,29 @@ REGIONE_TO_PROVINCE = {
     "Molise": ["Campobasso", "Isernia"],
     "Valle d'Aosta": ["Aosta"],
     "Trentino-Alto Adige": ["Trento", "Bolzano"],
+}
+
+# ─────────────────────────────────────────────────────────────
+# NEGATIVE KEYWORDS: se trovate nel bando, abbassano il punteggio
+# per aziende del settore indicato.
+# Formato: ateco_prefix → lista di keyword da penalizzare
+# ─────────────────────────────────────────────────────────────
+ATECO_NEGATIVE_KEYWORDS = {
+    "49.4": [  # Trasporto MERCI — penalizza bandi di passeggeri
+        "trasporto passeggeri", "trasporto di passeggeri",
+        "servizi di linea", "autobus di linea", "trasporto pubblico locale",
+        "mobilità urbana", "servizi scolastici", "trasporto scolastico",
+        "noleggio autobus con conducente", "noleggio pullman",
+        "servizi speciali di trasporto passeggeri", "servizi di trasporto passeggeri",
+        "sostitutive treno", "sostituzione treni", "servizi ferroviari sostitutivi",
+        "trasporto collettivo", "taxi", "ncc", "noleggio con conducente passeggeri",
+    ],
+    "49.3": [  # Trasporto PASSEGGERI — penalizza bandi di merci
+        "trasporto merci", "trasporto di merci", "merci su strada",
+        "autotrasporto merci", "spedizioni merci", "logistica merci",
+        "camion", "tir", "semirimorchi",
+    ],
+    "49.1": [  # Ferroviario passeggeri — penalizza stradale
+        "trasporto stradale", "veicoli su gomma", "autotrasporto",
+    ],
 }
