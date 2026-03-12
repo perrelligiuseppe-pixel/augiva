@@ -97,7 +97,7 @@ export default function RegisterPage() {
       const { data, error: signUpErr } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { emailRedirectTo: 'https://app.augiva.com/auth/callback' }
+        options: { emailRedirectTo: 'https://augiva.vercel.app/auth/callback' }
       })
       if (signUpErr) throw new Error(signUpErr.message)
       if (data?.user?.identities?.length === 0) throw new Error('Email già registrata. Prova ad accedere.')

@@ -47,17 +47,17 @@ export default function OnboardingPage() {
     setCompanyData(null)
 
     try {
-      const res = await fetch(`https://api.openapi.com/eco/v1/fiscal-code/${piva.trim()}?apikey=test_live`)
+      const res = await fetch(`/api/lookup-piva?piva=${piva.trim()}`)
       if (res.ok) {
         const data = await res.json()
-        const company = data?.data || data
-        setRagioneSociale(company?.ragione_sociale || company?.name || '')
-        setAteco(company?.ateco || company?.ateco_code || '')
-        setAtecoDesc(company?.ateco_desc || company?.ateco_description || '')
-        setFormaGiuridica(company?.forma_giuridica || company?.legal_form || '')
-        setPec(company?.pec || '')
-        setRegione(company?.regione || company?.region || '')
-        setCompanyData(company)
+        if (data.isValid && data.ragioneSociale) {
+          setRagioneSociale(data.ragioneSociale || '')
+          setAteco(data.atecoCode || '')
+          setAtecoDesc(data.atecoDescrizione || '')
+          setFormaGiuridica(data.formaGiuridica || '')
+          setPec(data.pec || '')
+          setRegione(data.regione || '')
+          setCompanyData(data)
       } else {
         // Fallback: show empty fields for manual entry
         setCompanyData({})
