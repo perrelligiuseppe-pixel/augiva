@@ -58,10 +58,13 @@ export default function OnboardingPage() {
           setPec(data.pec || '')
           setRegione(data.regione || '')
           setCompanyData(data)
+        } else {
+          // Fallback: campi manuali
+          setCompanyData({})
+          setRagioneSociale('')
+        }
       } else {
-        // Fallback: show empty fields for manual entry
         setCompanyData({})
-        setRagioneSociale('')
       }
     } catch (e) {
       setCompanyData({})
