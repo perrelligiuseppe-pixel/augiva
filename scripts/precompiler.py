@@ -251,7 +251,7 @@ class Precompiler:
         self.conn.commit()
 
     def upload_pdf_to_supabase(self, pdf_bytes: bytes, filename: str) -> Optional[str]:
-        """Upload PDF su Supabase Storage, ritorna signed URL (valido 7 giorni)."""
+        """Upload PDF su Supabase Storage, ritorna URL pubblico."""
         try:
             from supabase import create_client
             sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -260,9 +260,7 @@ class Precompiler:
                 path, pdf_bytes,
                 file_options={"content-type": "application/pdf", "upsert": "true"}
             )
-            # Bucket privato → signed URL valido 7 giorni (604800 secondi)
-            signed = sb.storage.from_("company-docs").create_signed_url(path, 604800)
-            return signed.get("signedURL") or signed.get("signedUrl")
+            return sb.storage.from_("company-docs").get_public_url(path)
         except Exception as e:
             logger.error(f"Upload PDF fallito: {e}")
             return None
