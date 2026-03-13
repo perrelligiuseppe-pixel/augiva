@@ -89,6 +89,7 @@ export default function PrecompilaPage() {
   const docsOfficial = documents?.filter(d => ['official', 'download'].includes(d.category)) || []
 
   const checkMissing = checklist?.filter(c => c.category === 'missing') || []
+  const checkClientSpecific = checklist?.filter(c => c.category === 'client_specific') || []
   const checkReady = checklist?.filter(c => ['ready', 'generated', 'download'].includes(c.category)) || []
 
   const scadenza = job?.tender?.deadline_date
@@ -225,6 +226,27 @@ export default function PrecompilaPage() {
                           🔗 Vai al modulo
                         </a>
                       )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* DA PREPARARE DA TE */}
+            {checkClientSpecific.length > 0 && (
+              <section style={{ marginBottom: '24px' }}>
+                <h3 style={{ fontSize: '12px', fontWeight: '700', color: '#A855F7', textTransform: 'uppercase', letterSpacing: '0.1em', margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  ✍️ Da preparare con i tuoi dati
+                  <span style={{ background: 'rgba(168,85,247,0.12)', color: '#A855F7', fontSize: '11px', padding: '2px 8px', borderRadius: '20px', fontWeight: '700' }}>{checkClientSpecific.length}</span>
+                </h3>
+                <div style={{ background: 'rgba(168,85,247,0.05)', borderRadius: '14px', border: '1px solid rgba(168,85,247,0.15)', overflow: 'hidden' }}>
+                  {checkClientSpecific.map((item, i) => (
+                    <div key={i} style={{ padding: '14px 20px', borderBottom: i < checkClientSpecific.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                      <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>✍️</span>
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: '600', color: '#F4F4F5' }}>{item.item}</div>
+                        <div style={{ fontSize: '12px', color: '#71717A', marginTop: '2px' }}>{item.notes || 'Da preparare in autonomia con i dati del tuo progetto'}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
