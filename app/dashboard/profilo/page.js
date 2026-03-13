@@ -39,6 +39,14 @@ export default function ProfiloPage() {
     regioni_operative: [],
     pec: '',
     forma_giuridica: '',
+    legale_rappresentante: '',
+    cf_azienda: '',
+    indirizzo_sede: '',
+    cciaa_numero: '',
+    data_nascita_lr: '',
+    luogo_nascita_lr: '',
+    dipendenti: '',
+    fatturato: '',
   })
 
   useEffect(() => {
@@ -58,6 +66,14 @@ export default function ProfiloPage() {
           regioni_operative: data.regioni_operative || [],
           pec: data.pec || '',
           forma_giuridica: data.forma_giuridica || '',
+          legale_rappresentante: data.legale_rappresentante || '',
+          cf_azienda: data.cf_azienda || '',
+          indirizzo_sede: data.indirizzo_sede || '',
+          cciaa_numero: data.cciaa_numero || '',
+          data_nascita_lr: data.data_nascita_lr || '',
+          luogo_nascita_lr: data.luogo_nascita_lr || '',
+          dipendenti: data.dipendenti || '',
+          fatturato: data.fatturato || '',
         })
         // Carica documenti
         const { data: files } = await supabase.storage
@@ -90,6 +106,14 @@ export default function ProfiloPage() {
       regioni_operative: form.regioni_operative,
       pec: form.pec,
       forma_giuridica: form.forma_giuridica,
+      legale_rappresentante: form.legale_rappresentante,
+      cf_azienda: form.cf_azienda,
+      indirizzo_sede: form.indirizzo_sede,
+      cciaa_numero: form.cciaa_numero,
+      data_nascita_lr: form.data_nascita_lr,
+      luogo_nascita_lr: form.luogo_nascita_lr,
+      dipendenti: form.dipendenti,
+      fatturato: form.fatturato,
     }).eq('id', company.id)
     setSaving(false)
     if (!error) { setSaved(true); setTimeout(() => setSaved(false), 2500) }
@@ -158,7 +182,7 @@ export default function ProfiloPage() {
         {/* Dati azienda */}
         <div style={{ background: '#3A3A45', borderRadius: '16px', padding: '28px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '24px' }}>
           <h3 style={{ fontSize: '14px', fontWeight: '700', color: '#F4F4F5', margin: '0 0 20px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Dati azienda</h3>
-          {[['Ragione sociale','ragione_sociale'],['Partita IVA','piva'],['Codice ATECO','ateco'],['Descrizione attività','ateco_desc'],['PEC','pec'],['Forma giuridica','forma_giuridica']].map(([label, key]) => (
+          {[['Ragione sociale','ragione_sociale'],['Partita IVA','piva'],['Codice ATECO','ateco'],['Descrizione attività','ateco_desc'],['PEC','pec'],['Forma giuridica','forma_giuridica'],['Codice Fiscale azienda','cf_azienda'],['Indirizzo sede legale','indirizzo_sede'],['N° iscrizione CCIAA','cciaa_numero'],['Dipendenti (n°)','dipendenti'],['Fatturato ultimo anno (€)','fatturato']].map(([label, key]) => (
             <div key={key} style={{ marginBottom: '18px' }}>
               <label style={lbl}>{label}</label>
               <input value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} style={inp} />
@@ -171,6 +195,26 @@ export default function ProfiloPage() {
               {REGIONI.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
           </div>
+        </div>
+
+        {/* Legale Rappresentante */}
+        <div style={{ marginTop: '24px', background: '#3A3A45', borderRadius: '16px', padding: '20px', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#A1A1AA', textTransform: 'uppercase', letterSpacing: '0.08em', margin: '0 0 16px' }}>
+            👤 Legale Rappresentante
+          </h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+            {[['Nome e Cognome','legale_rappresentante'],['Luogo di nascita','luogo_nascita_lr'],['Data di nascita (gg/mm/aaaa)','data_nascita_lr'],['Codice Fiscale azienda','cf_azienda'],['Indirizzo sede legale','indirizzo_sede'],['N° iscrizione CCIAA','cciaa_numero'],['Dipendenti (n°)','dipendenti'],['Fatturato ultimo anno (€)','fatturato']].map(([label, key]) => (
+              <div key={key}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '600', color: '#71717A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>{label}</label>
+                <input value={form[key] || ''} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+                  placeholder={label}
+                  style={{ width: '100%', background: '#40404C', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 14px', color: '#F4F4F5', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: '12px', color: '#71717A', marginTop: '12px', fontStyle: 'italic' }}>
+            💡 Questi dati vengono usati per precompilare le dichiarazioni e la domanda di partecipazione. Più completo è il profilo, migliore sarà la precompilazione.
+          </p>
         </div>
 
         {/* Aree operative */}

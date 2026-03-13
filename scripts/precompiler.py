@@ -299,7 +299,7 @@ class Precompiler:
         # Header
         story.append(Paragraph(title, style_title))
         story.append(Paragraph(
-            f"Documento generato automaticamente — {company.get('ragione_sociale','')} — {get_today_str()}",
+            f"{company.get('ragione_sociale','')} — {get_today_str()}",
             style_subtitle
         ))
         story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#E5E5EA'), spaceAfter=16))
@@ -319,11 +319,7 @@ class Precompiler:
 
         # Footer
         story.append(Spacer(1, 20))
-        story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor('#E5E5EA')))
-        story.append(Paragraph(
-            "Bozza generata da Augiva.com · Verificare, completare, firmare e inviare personalmente.",
-            ParagraphStyle('Footer', fontSize=7, textColor=colors.HexColor('#A1A1AA'), spaceBefore=6)
-        ))
+        # Nessun disclaimer AI nei documenti — solo sul sito Augiva
 
         doc.build(story)
         return buf.getvalue()
@@ -526,6 +522,13 @@ TESTO: {text[:5000]}"""
         dipendenti = company.get('dipendenti') or '___'
         fatturato = company.get('fatturato') or '___'
 
+        lr = company.get('legale_rappresentante') or '___________________________'
+        cf = company.get('cf_azienda') or '_______________'
+        indirizzo = company.get('indirizzo_sede') or comune_sede
+        cciaa = company.get('cciaa_numero') or '_______________'
+        data_nascita = company.get('data_nascita_lr') or '___/___/______'
+        luogo_nascita = company.get('luogo_nascita_lr') or '_______________'
+
         vars_map = {
             '{ragione_sociale}': company.get('ragione_sociale', '___'),
             '{piva}': company.get('piva') or company.get('p_iva', '___'),
@@ -533,16 +536,17 @@ TESTO: {text[:5000]}"""
             '{ateco}': company.get('ateco', '___'),
             '{ateco_desc}': company.get('ateco_desc', '___'),
             '{forma_giuridica}': company.get('forma_giuridica', '___'),
-            '{indirizzo_sede}': f"{comune_sede}",
+            '{indirizzo_sede}': indirizzo,
             '{comune_sede}': comune_sede,
             '{data}': today,
             '{anno1}': y1, '{anno2}': y2, '{anno3}': y3,
-            '{nome_legale_rappresentante}': '___________________________',
-            '{data_nascita}': '___/___/______',
-            '{luogo_nascita}': '_______________',
-            '{codice_fiscale}': '_______________',
-            '{dipendenti}': str(dipendenti),
-            '{fatturato}': str(fatturato),
+            '{nome_legale_rappresentante}': lr,
+            '{data_nascita}': data_nascita,
+            '{luogo_nascita}': luogo_nascita,
+            '{codice_fiscale}': cf,
+            '{cciaa_numero}': cciaa,
+            '{dipendenti}': str(dipendenti) if dipendenti and str(dipendenti) != '___' else '___',
+            '{fatturato}': str(fatturato) if fatturato and str(fatturato) != '___' else '___',
             '{titolo_bando}': tender.get('title', tender.get('titolo', ''))[:100],
             '{ente_erogatore}': tender.get('ente') or tender.get('contracting_body', '___'),
             '{ente_destinatario}': tender.get('ente') or tender.get('contracting_body', '___'),

@@ -32,12 +32,16 @@ export default function BandoPage() {
   const [loading, setLoading] = useState(true)
   const [precompiling, setPrecompiling] = useState(false)
   const [session, setSession] = useState(null)
+  const [company, setCompany] = useState(null)
+  const [showGate, setShowGate] = useState(false)
 
   useEffect(() => {
     const load = async () => {
       const { data: { session: s } } = await supabase.auth.getSession()
       if (!s) { router.push('/auth/login'); return }
       setSession(s)
+      const { data: comp } = await supabase.from('companies').select('legale_rappresentante, documenti_ids, regione').eq('user_id', s.user.id).single()
+      if (comp) setCompany(comp)
 
       const { data } = await supabase
         .from('matches')
@@ -69,6 +73,9 @@ export default function BandoPage() {
 
   const handlePrecompila = async () => {
     if (!match || !session || precompiling) return
+    // Gate: controlla se il profilo è sufficientemente completo
+    const hasLR = company?.legale_rappresentante
+    if (!hasLR) { setShowGate(true); return }
     setPrecompiling(true)
 
     try {
@@ -105,6 +112,30 @@ export default function BandoPage() {
 
   if (!match) return null
 
+  // Modale gate pre-precompilazione
+  const GateModal = showGate && (
+    <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
+      <div style={{ background:'#3A3A45', borderRadius:'20px', padding:'28px', maxWidth:'420px', width:'100%', border:'1px solid rgba(255,255,255,0.12)' }}>
+        <p style={{ fontSize:'24px', textAlign:'center', marginBottom:'12px' }}>📋</p>
+        <h2 style={{ fontSize:'17px', fontWeight:'800', color:'#F4F4F5', margin:'0 0 10px', textAlign:'center' }}>Profilo incompleto</h2>
+        <p style={{ fontSize:'14px', color:'#A1A1AA', lineHeight:1.6, margin:'0 0 20px', textAlign:'center' }}>
+          Per una precompilazione accurata, aggiungi il <strong style={{color:'#F4F4F5'}}>Legale Rappresentante</strong> e i dati completi nel tuo profilo.<br/><br/>
+          Senza questi dati i documenti avranno campi vuoti da completare manualmente.
+        </p>
+        <div style={{ display:'flex', gap:'10px', flexDirection:'column' }}>
+          <button onClick={() => { setShowGate(false); window.location.href='/dashboard/profilo' }}
+            style={{ background:'linear-gradient(135deg,#3B82F6,#2563EB)', border:'none', color:'#fff', padding:'13px', borderRadius:'10px', cursor:'pointer', fontWeight:'700', fontSize:'14px' }}>
+            ✏️ Completa il profilo ora
+          </button>
+          <button onClick={() => { setShowGate(false); setPrecompiling(true); handlePrecompila() }}
+            style={{ background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'#A1A1AA', padding:'11px', borderRadius:'10px', cursor:'pointer', fontSize:'13px' }}>
+            Procedi comunque (precompilazione parziale)
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
   const { score, titolo, ente, tipo, source, importo, scadenza, regioni, sintesi, link } = match
   const ringColor = score >= 80 ? '#34C759' : score >= 65 ? '#3B82F6' : score >= 50 ? '#FF9F0A' : '#FF453A'
   const days = daysLeft(scadenza)
@@ -114,6 +145,7 @@ export default function BandoPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#32323C', fontFamily: 'Inter, sans-serif', color: '#F4F4F5' }}>
+      {GateModal}
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       {/* Navbar */}
