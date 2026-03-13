@@ -18,6 +18,7 @@ import time
 import logging
 import asyncio
 import re
+import base64
 import uuid
 from datetime import datetime
 from typing import Optional, Dict, Any, List
@@ -198,6 +199,33 @@ def get_year_range() -> tuple:
     return str(y-2), str(y-1), str(y)
 
 
+
+def call_claude_vision(pdf_bytes: bytes, prompt: str) -> Optional[str]:
+    """Invia un PDF a Claude Sonnet per OCR/estrazione dati."""
+    import urllib.request
+    pdf_b64 = base64.b64encode(pdf_bytes).decode()
+    payload = json.dumps({
+        "model": "claude-sonnet-4-6",
+        "max_tokens": 800,
+        "messages": [{"role": "user", "content": [
+            {"type": "document", "source": {"type": "base64", "media_type": "application/pdf", "data": pdf_b64}},
+            {"type": "text", "text": prompt}
+        ]}]
+    }).encode()
+    req = urllib.request.Request(
+        "https://api.anthropic.com/v1/messages", data=payload,
+        headers={"x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "content-type": "application/json"},
+        method="POST"
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=40) as resp:
+            data = json.loads(resp.read())
+            return data["content"][0]["text"]
+    except Exception as e:
+        logger.error(f"Claude Vision OCR error: {e}")
+        return None
+
+
 # ─── Precompiler ────────────────────────────────────────────────────────────
 
 class Precompiler:
@@ -214,6 +242,117 @@ class Precompiler:
                 (status, step, error, status, job_id)
             )
         self.conn.commit()
+
+    def download_file_from_storage(self, path: str) -> Optional[bytes]:
+        """Scarica un file da Supabase Storage."""
+        try:
+            from supabase import create_client
+            sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+            res = sb.storage.from_("company-docs").download(path)
+            return res
+        except Exception as e:
+            logger.warning(f"Download file fallito {path}: {e}")
+            return None
+
+    def extract_company_data_from_docs(self, company: dict) -> dict:
+        """
+        Scarica la visura camerale (o altri doc) da Storage e usa Gemini Vision
+        per estrarre i dati aziendali in modo automatico.
+        Ritorna un dict con i dati estratti (solo quelli trovati).
+        """
+        company_id = str(company.get('id', ''))
+        extracted = {}
+
+        try:
+            from supabase import create_client
+            sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+            files = sb.storage.from_("company-docs").list(
+                f"{company_id}/", {"limit": 50}
+            )
+            if not files:
+                return extracted
+
+            # Cerca prima la visura camerale, poi altri doc utili
+            priority_keywords = ['visura', 'camera', 'registro_imprese']
+            fallback_keywords = ['statuto', 'atto_costitutivo', 'bilancio']
+
+            target_file = None
+            for kw in priority_keywords:
+                for f in files:
+                    if kw in f['name'].lower():
+                        target_file = f['name']
+                        break
+                if target_file:
+                    break
+
+            if not target_file:
+                for kw in fallback_keywords:
+                    for f in files:
+                        if kw in f['name'].lower():
+                            target_file = f['name']
+                            break
+                    if target_file:
+                        break
+
+            if not target_file:
+                logger.info(f"[OCR] Nessun documento utile trovato per company {company_id[:8]}")
+                return extracted
+
+            logger.info(f"[OCR] Analisi documento: {target_file}")
+            pdf_bytes = self.download_file_from_storage(f"{company_id}/{target_file}")
+            if not pdf_bytes:
+                return extracted
+
+            prompt = """Analizza questo documento aziendale (visura camerale, statuto, o simile) e restituisci SOLO un JSON valido. Non inventare nulla — usa solo ciò che leggi chiaramente nel documento. Per ogni campo non trovato usa null. Restituisci SOLO il JSON grezzo, senza markdown, senza backtick, senza testo aggiuntivo.
+{"ragione_sociale":null,"forma_giuridica":null,"piva":null,"cf_azienda":null,"indirizzo_sede":null,"cciaa_numero":null,"legale_rappresentante":null,"data_nascita_lr":null,"luogo_nascita_lr":null,"cf_lr":null,"ateco":null,"dipendenti":null}"""
+
+            result = call_claude_vision(pdf_bytes, prompt)
+            if not result:
+                return extracted
+
+            # Estrai JSON dalla risposta
+            json_match = re.search(r'\{.*\}', result, re.DOTALL)
+            if json_match:
+                raw = json.loads(json_match.group())
+                # Filtra solo i valori non null e non vuoti
+                for k, v in raw.items():
+                    if v and str(v).strip() not in ('null', 'None', '', '---'):
+                        extracted[k] = str(v).strip()
+                logger.info(f"[OCR] Estratti {len(extracted)} campi da {target_file}")
+
+        except Exception as e:
+            logger.error(f"[OCR] Errore estrazione dati: {e}")
+
+        return extracted
+
+    def update_company_with_extracted_data(self, company_id: str, extracted: dict):
+        """Aggiorna il record company con i dati estratti dall'OCR."""
+        if not extracted:
+            return
+        # Mappa i campi estratti alle colonne DB
+        field_map = {
+            'legale_rappresentante': 'legale_rappresentante',
+            'cf_azienda': 'cf_azienda',
+            'indirizzo_sede': 'indirizzo_sede',
+            'cciaa_numero': 'cciaa_numero',
+            'data_nascita_lr': 'data_nascita_lr',
+            'luogo_nascita_lr': 'luogo_nascita_lr',
+            'dipendenti': 'dipendenti',
+            'forma_giuridica': 'forma_giuridica',
+        }
+        update_data = {db_col: extracted[src_key]
+                       for src_key, db_col in field_map.items()
+                       if src_key in extracted}
+        if not update_data:
+            return
+        with self.conn.cursor() as cur:
+            set_clause = ", ".join(f"{k} = %s" for k in update_data.keys())
+            cur.execute(
+                f"UPDATE companies SET {set_clause} WHERE id = %s",
+                list(update_data.values()) + [company_id]
+            )
+        self.conn.commit()
+        logger.info(f"[OCR] Company aggiornata con {len(update_data)} campi reali")
 
     def get_tender(self, tender_id: str) -> Optional[dict]:
         with self.conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -666,6 +805,17 @@ Scrivi solo il piano, senza spiegazioni."""
                 return
 
             logger.info(f"[JOB {job_id}] Bando: {tender.get('title','')[:60]}")
+
+            # Step 1b: OCR documenti aziendali — estrai dati reali
+            self.update_job_status(job_id, 'analyzing', 'Leggo i tuoi documenti aziendali...')
+            extracted = self.extract_company_data_from_docs(company)
+            if extracted:
+                self.update_company_with_extracted_data(str(company['id']), extracted)
+                # Aggiorna il dict company con i dati estratti per questa run
+                company.update(extracted)
+                logger.info(f"[JOB {job_id}] Dati estratti da documenti: {list(extracted.keys())}")
+            else:
+                logger.info(f"[JOB {job_id}] Nessun documento trovato — uso solo dati profilo")
 
             # Step 2: Analisi profonda bando
             self.update_job_status(job_id, 'analyzing', 'Analizzo il bando in dettaglio...')
