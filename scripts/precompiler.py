@@ -251,7 +251,7 @@ class Precompiler:
         self.conn.commit()
 
     def upload_pdf_to_supabase(self, pdf_bytes: bytes, filename: str) -> Optional[str]:
-        """Upload PDF su Supabase Storage, ritorna URL pubblico."""
+        """Upload PDF su Supabase Storage, ritorna signed URL (valido 7 giorni)."""
         try:
             from supabase import create_client
             sb = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
@@ -260,8 +260,9 @@ class Precompiler:
                 path, pdf_bytes,
                 file_options={"content-type": "application/pdf", "upsert": "true"}
             )
-            url_resp = sb.storage.from_("company-docs").get_public_url(path)
-            return url_resp
+            # Bucket privato → signed URL valido 7 giorni (604800 secondi)
+            signed = sb.storage.from_("company-docs").create_signed_url(path, 604800)
+            return signed.get("signedURL") or signed.get("signedUrl")
         except Exception as e:
             logger.error(f"Upload PDF fallito: {e}")
             return None
@@ -456,8 +457,22 @@ TESTO: {text[:5000]}"""
                 cat = 'missing'
                 note_out = 'Da richiedere ai fornitori previsti'
             else:
-                cat = 'missing'
-                note_out = note or 'Da procurarsi'
+                # Documenti tecnici specifici → il cliente li deve preparare
+                CLIENT_DOCS = [
+                    'offerta tecnica', 'offerta economica', 'offerta', 'progetto tecnico',
+                    'relazione tecnica', 'piano tecnico', 'proposta tecnica',
+                    'referenze', 'referenza', 'servizi analoghi', 'esperienze analoghe',
+                    'curriculum', 'cv', 'cauzione', 'garanzia provvisoria', 'fideiussione',
+                    'polizza', 'iscrizione albo', 'iscrizione ccia', 'attestazione soa',
+                    'certificazione iso', 'certificato qualità', 'certificazione',
+                ]
+                nome_lower = nome.lower()
+                if any(kw in nome_lower for kw in CLIENT_DOCS):
+                    cat = 'client_specific'
+                    note_out = 'Da preparare in autonomia con i dati del tuo progetto'
+                else:
+                    cat = 'missing'
+                    note_out = note or 'Da procurarsi'
 
             # Evita duplicati con quelli già in aziendali
             if not any(c['item'] == nome for c in checklist):
