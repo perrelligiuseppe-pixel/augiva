@@ -183,7 +183,7 @@ export default function BandoPage() {
             <div style={{ background: '#32323C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '26px', marginBottom: '14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px', fontSize: '9px', fontWeight: '700', letterSpacing: '0.07em', textTransform: 'uppercase', padding: '2px 7px', borderRadius: '5px', background: tipo === 'appalto' ? 'rgba(59,130,246,.12)' : 'rgba(52,199,89,.1)', color: tipo === 'appalto' ? '#3B82F6' : '#34C759', border: `1px solid ${tipo === 'appalto' ? 'rgba(59,130,246,.25)' : 'rgba(52,199,89,.25)'}` }}>
-                  {tipo === 'appalto' ? '📋 Gara d'appalto' : '💰 Fondo / Agevolazione'}
+                  {tipo === 'appalto' ? "📋 Gara d'appalto" : "💰 Fondo / Agevolazione"}
                 </span>
                 {sourceLabel && <span style={{ fontSize: '9px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '2px 8px', borderRadius: '5px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.07)', color: '#A1A1AA' }}>{sourceLabel}</span>}
               </div>
