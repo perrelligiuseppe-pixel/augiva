@@ -725,11 +725,19 @@ Scrivi solo il piano, senza spiegazioni."""
                 sort += 1
 
             # 4d. Moduli ufficiali da scaricare
+            tender_url = tender.get('url', '')
             for modulo in analysis.get('moduli_scaricabili', []):
+                modulo_url = modulo.get('url_probabile', '')
+                # Se l'URL estratto sembra poco preciso, usa URL principale del bando
+                if not modulo_url or modulo_url == tender_url:
+                    modulo_url = tender_url
+                    note = f'Cerca gli allegati sul sito del bando: {tender_url}'
+                else:
+                    note = f'Link diretto al modulo (se non funziona, cerca sul sito del bando)'
                 self.save_document(
                     job_id, modulo.get('nome', 'Modulo ufficiale'), 'official', 'download_link',
-                    download_url=modulo.get('url_probabile', ''),
-                    notes='Modulo ufficiale da scaricare, compilare e firmare', sort_order=sort
+                    download_url=modulo_url,
+                    notes=note, sort_order=sort
                 )
                 sort += 1
 
