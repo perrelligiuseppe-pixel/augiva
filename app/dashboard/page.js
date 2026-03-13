@@ -139,20 +139,39 @@ export default function DashboardPage() {
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 24px' }}>
 
         {/* Heading */}
-        <div style={{ marginBottom: '32px' }}>
-          {company?.ragione_sociale && (
-            <p style={{ fontSize: '14px', fontWeight: '600', color: '#059669', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              {company.ragione_sociale}
+        <div style={{ marginBottom: '28px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <h1 style={{ fontSize: '28px', fontWeight: '900', letterSpacing: '-1.2px', lineHeight: 1.2, margin: '0 0 6px', background: 'linear-gradient(180deg, #F4F4F5 0%, #71717A 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Le tue opportunità
+            </h1>
+            <p style={{ fontSize: '13px', color: '#71717A', margin: 0 }}>
+              Aggiornate giovedì · prossima scansione tra 6 giorni
             </p>
+          </div>
+          {totale > 0 && (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {appalti.length > 0 && (
+                <div style={{ background: '#3A3A45', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '10px', padding: '8px 14px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '-0.5px' }}>{appalti.length}</div>
+                  <div style={{ fontSize: '10px', color: '#71717A', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Appalti</div>
+                </div>
+              )}
+              {fondi.length > 0 && (
+                <div style={{ background: '#3A3A45', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '10px', padding: '8px 14px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '-0.5px' }}>{fondi.length}</div>
+                  <div style={{ fontSize: '10px', color: '#71717A', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Fondi</div>
+                </div>
+              )}
+              {appalti.filter(a => { try { const d = new Date(a.scadenza) - new Date(); return Math.ceil(d/86400000) <= 15 && Math.ceil(d/86400000) > 0 } catch{return false} }).length > 0 && (
+                <div style={{ background: '#3A3A45', border: '1px solid rgba(255,159,10,.3)', borderRadius: '10px', padding: '8px 14px', textAlign: 'center' }}>
+                  <div style={{ fontSize: '18px', fontWeight: '800', letterSpacing: '-0.5px', color: '#FF9F0A' }}>
+                    {appalti.filter(a => { try { const d = new Date(a.scadenza) - new Date(); return Math.ceil(d/86400000) <= 15 && Math.ceil(d/86400000) > 0 } catch{return false} }).length}
+                  </div>
+                  <div style={{ fontSize: '10px', color: '#FF9F0A', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Urgenti</div>
+                </div>
+              )}
+            </div>
           )}
-          <h1 style={{ fontSize: '28px', fontWeight: '900', color: '#F4F4F5', margin: '0 0 8px', letterSpacing: '-0.5px' }}>
-            Le tue opportunità 🎯
-          </h1>
-          <p style={{ fontSize: '15px', color: '#A1A1AA', margin: 0 }}>
-            {totale > 0
-              ? `${totale} opportunità trovate per ${company?.ragione_sociale || 'la tua azienda'} — ordinate per compatibilità`
-              : `Nessuna opportunità trovata ancora`}
-          </p>
         </div>
 
         {/* Stato analisi in corso */}
@@ -166,12 +185,9 @@ export default function DashboardPage() {
         {/* Gare d'appalto */}
         {appalti.length > 0 && (
           <div style={{ marginBottom: '36px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-              <span style={{ fontSize: '18px' }}>📋</span>
-              <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#F4F4F5', margin: 0 }}>Gare d&apos;appalto</h2>
-              <span style={{ fontSize: '13px', color: '#A1A1AA', background: 'rgba(255,255,255,0.08)', padding: '3px 10px', borderRadius: '20px' }}>
-                {appalti.length} match
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: '#71717A', textTransform: 'uppercase', letterSpacing: '0.1em' }}>📋 Gare d&apos;appalto</span>
+              <span style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '2px 8px', fontSize: '11px', color: '#71717A', fontWeight: '600' }}>{appalti.length}</span>
             </div>
             {appalti.map(t => <TenderRow key={t.id} tender={t} />)}
           </div>
@@ -180,12 +196,9 @@ export default function DashboardPage() {
         {/* Fondi e agevolazioni */}
         {fondi.length > 0 && (
           <div style={{ marginBottom: '36px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-              <span style={{ fontSize: '18px' }}>💰</span>
-              <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#F4F4F5', margin: 0 }}>Fondi e agevolazioni</h2>
-              <span style={{ fontSize: '13px', color: '#A1A1AA', background: 'rgba(255,255,255,0.08)', padding: '3px 10px', borderRadius: '20px' }}>
-                {fondi.length} match
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+              <span style={{ fontSize: '11px', fontWeight: '700', color: '#71717A', textTransform: 'uppercase', letterSpacing: '0.1em' }}>💰 Fondi & agevolazioni</span>
+              <span style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '20px', padding: '2px 8px', fontSize: '11px', color: '#71717A', fontWeight: '600' }}>{fondi.length}</span>
             </div>
             {fondi.map(t => <TenderRow key={t.id} tender={t} />)}
           </div>
