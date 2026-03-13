@@ -4,11 +4,14 @@ import { NextResponse } from 'next/server'
 const SUPABASE_URL = 'https://izwpthubencimzsgervo.supabase.co'
 const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6d3B0aHViZW5jaW16c2dlcnZvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjcxODIzMywiZXhwIjoyMDg4Mjk0MjMzfQ.TWSDql63NZ8Nt00Ii-zT-85kBJnki8AoQJZ98oD-Ios'
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-
-export async function GET(request, { params }) {
+export async function GET(request, context) {
   try {
-    const { job_id } = params
+    // Next.js 14/15 compatible — await params
+    const params = await context.params
+    const job_id = params.job_id
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
     const authHeader = request.headers.get('authorization') || ''
     const token = authHeader.replace('Bearer ', '')
     const { data: { user }, error: authErr } = await supabase.auth.getUser(token)
@@ -18,6 +21,7 @@ export async function GET(request, { params }) {
       .from('precompile_jobs')
       .select('*, tenders(id, title, ente, tipo, url, estimated_value, deadline_date)')
       .eq('id', job_id).single()
+
     if (jobErr || !job) return NextResponse.json({ error: 'Job non trovato' }, { status: 404 })
 
     const { data: checklist } = await supabase
@@ -42,6 +46,6 @@ export async function GET(request, { params }) {
     })
   } catch (err) {
     console.error('GET /api/precompile/[job_id] error:', err)
-    return NextResponse.json({ error: 'Errore interno' }, { status: 500 })
+    return NextResponse.json({ error: 'Errore interno: ' + err.message }, { status: 500 })
   }
 }
