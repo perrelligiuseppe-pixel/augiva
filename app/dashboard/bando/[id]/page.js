@@ -74,8 +74,8 @@ export default function BandoPage() {
   const handlePrecompila = async () => {
     if (!match || !session || precompiling) return
     // Gate: controlla se il profilo è sufficientemente completo
-    const hasLR = company?.legale_rappresentante
-    if (!hasLR) { setShowGate(true); return }
+    const hasDocs = company?.documenti_ids && company.documenti_ids.length > 0
+    if (!hasDocs) { setShowGate(true); return }
     setPrecompiling(true)
 
     try {
@@ -116,18 +116,26 @@ export default function BandoPage() {
   const GateModal = showGate && (
     <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.7)', zIndex:200, display:'flex', alignItems:'center', justifyContent:'center', padding:'20px' }}>
       <div style={{ background:'#3A3A45', borderRadius:'20px', padding:'28px', maxWidth:'420px', width:'100%', border:'1px solid rgba(255,255,255,0.12)' }}>
-        <p style={{ fontSize:'24px', textAlign:'center', marginBottom:'12px' }}>📋</p>
-        <h2 style={{ fontSize:'17px', fontWeight:'800', color:'#F4F4F5', margin:'0 0 10px', textAlign:'center' }}>Profilo incompleto</h2>
-        <p style={{ fontSize:'14px', color:'#A1A1AA', lineHeight:1.6, margin:'0 0 20px', textAlign:'center' }}>
-          Per una precompilazione accurata, aggiungi il <strong style={{color:'#F4F4F5'}}>Legale Rappresentante</strong> e i dati completi nel tuo profilo.<br/><br/>
-          Senza questi dati i documenti avranno campi vuoti da completare manualmente.
+        <p style={{ fontSize:'28px', textAlign:'center', marginBottom:'12px' }}>📄</p>
+        <h2 style={{ fontSize:'17px', fontWeight:'800', color:'#F4F4F5', margin:'0 0 10px', textAlign:'center' }}>Carica i documenti aziendali</h2>
+        <p style={{ fontSize:'14px', color:'#A1A1AA', lineHeight:1.7, margin:'0 0 6px' }}>
+          Per una precompilazione accurata, carica nel tuo profilo:
+        </p>
+        <ul style={{ fontSize:'13px', color:'#D4D4D8', lineHeight:2, margin:'0 0 16px', paddingLeft:'20px' }}>
+          <li><strong>Visura camerale</strong> — dati azienda, legale rappresentante, sede</li>
+          <li><strong>Ultimo bilancio</strong> — dati finanziari per i requisiti economici</li>
+          <li><strong>DURC</strong> — regolarità contributiva</li>
+          <li>Altri documenti richiesti dal bando</li>
+        </ul>
+        <p style={{ fontSize:'12px', color:'#71717A', margin:'0 0 20px' }}>
+          Più documenti carichi, più accurata sarà la precompilazione.
         </p>
         <div style={{ display:'flex', gap:'10px', flexDirection:'column' }}>
           <button onClick={() => { setShowGate(false); window.location.href='/dashboard/profilo' }}
             style={{ background:'linear-gradient(135deg,#3B82F6,#2563EB)', border:'none', color:'#fff', padding:'13px', borderRadius:'10px', cursor:'pointer', fontWeight:'700', fontSize:'14px' }}>
-            ✏️ Completa il profilo ora
+            📎 Carica documenti nel profilo
           </button>
-          <button onClick={() => { setShowGate(false); setPrecompiling(true); handlePrecompila() }}
+          <button onClick={async () => { setShowGate(false); await new Promise(r=>setTimeout(r,50)); setPrecompiling(true); const res=await fetch('/api/precompile',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({tender_id:match.tender_id})}); const d=await res.json(); if(d.job_id) router.push('/dashboard/precompila/'+d.job_id); else setPrecompiling(false); }}
             style={{ background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', color:'#A1A1AA', padding:'11px', borderRadius:'10px', cursor:'pointer', fontSize:'13px' }}>
             Procedi comunque (precompilazione parziale)
           </button>
