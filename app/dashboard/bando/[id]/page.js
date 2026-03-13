@@ -30,11 +30,14 @@ export default function BandoPage() {
   const { id } = useParams()
   const [match, setMatch] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [precompiling, setPrecompiling] = useState(false)
+  const [session, setSession] = useState(null)
 
   useEffect(() => {
     const load = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) { router.push('/auth/login'); return }
+      const { data: { session: s } } = await supabase.auth.getSession()
+      if (!s) { router.push('/auth/login'); return }
+      setSession(s)
 
       const { data } = await supabase
         .from('matches')
@@ -47,6 +50,7 @@ export default function BandoPage() {
       const t = data.tenders
       setMatch({
         id: data.id,
+        tender_id: t.id,
         score: Math.round(data.score > 1 ? data.score : data.score * 100),
         titolo: t.titolo || t.title || 'Opportunità',
         ente: t.ente || t.contracting_body || '',
@@ -62,6 +66,32 @@ export default function BandoPage() {
     }
     load()
   }, [id, router])
+
+  const handlePrecompila = async () => {
+    if (!match || !session || precompiling) return
+    setPrecompiling(true)
+
+    try {
+      const res = await fetch('/api/precompile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ tender_id: match.tender_id })
+      })
+      const data = await res.json()
+      if (data.job_id) {
+        router.push(`/dashboard/precompila/${data.job_id}`)
+      } else {
+        alert('Errore avvio precompilazione: ' + (data.error || 'errore sconosciuto'))
+        setPrecompiling(false)
+      }
+    } catch (e) {
+      alert('Errore di rete: ' + e.message)
+      setPrecompiling(false)
+    }
+  }
 
   if (loading) return (
     <div style={{ minHeight: '100vh', background: '#32323C', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif' }}>
@@ -80,11 +110,11 @@ export default function BandoPage() {
   const days = daysLeft(scadenza)
   const importoFmt = formatImporto(importo)
   const dateFmt = formatDate(scadenza)
-
   const sourceLabel = { TED: 'EU TED', MIMIT: 'MIMIT', INVITALIA: 'Invitalia', SIMEST: 'SIMEST', PNRR: 'PNRR', ANAC: 'ANAC' }[source] || source
 
   return (
     <div style={{ minHeight: '100vh', background: '#32323C', fontFamily: 'Inter, sans-serif', color: '#F4F4F5' }}>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       {/* Navbar */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(50,50,60,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.08)', padding: '0 32px', height: '60px', display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -98,9 +128,8 @@ export default function BandoPage() {
       {/* Content */}
       <div style={{ maxWidth: '720px', margin: '0 auto', padding: '40px 24px' }}>
 
-        {/* Header: score + titolo */}
+        {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '20px', marginBottom: '32px' }}>
-          {/* Pallino score grande */}
           <div style={{ width: '72px', height: '72px', borderRadius: '50%', border: `4px solid ${ringColor}`, background: `${ringColor}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <span style={{ fontSize: '18px', fontWeight: '900', color: ringColor }}>{score}%</span>
           </div>
@@ -125,9 +154,7 @@ export default function BandoPage() {
           {scadenza && (
             <div style={{ background: '#3A3A45', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
               <div style={{ fontSize: '11px', color: '#71717A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Scadenza</div>
-              <div style={{ fontSize: '16px', fontWeight: '700', color: days !== null && days <= 15 && days > 0 ? '#FF9F0A' : '#F4F4F5' }}>
-                {dateFmt}
-              </div>
+              <div style={{ fontSize: '16px', fontWeight: '700', color: days !== null && days <= 15 && days > 0 ? '#FF9F0A' : '#F4F4F5' }}>{dateFmt}</div>
               {days !== null && days > 0 && (
                 <div style={{ fontSize: '12px', color: days <= 15 ? '#FF9F0A' : '#A1A1AA', marginTop: '4px' }}>{days} giorni rimasti</div>
               )}
@@ -157,17 +184,27 @@ export default function BandoPage() {
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
           {link && (
             <a href={link} target="_blank" rel="noopener noreferrer"
-              style={{ flex: 1, minWidth: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', color: '#F4F4F5', fontSize: '15px', fontWeight: '600', padding: '16px 24px', borderRadius: '12px', textDecoration: 'none', transition: 'background .15s' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.13)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}>
+              style={{ flex: 1, minWidth: '180px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', color: '#F4F4F5', fontSize: '15px', fontWeight: '600', padding: '16px 24px', borderRadius: '12px', textDecoration: 'none' }}>
               🔗 Vai al bando originale
             </a>
           )}
           <button
-            style={{ flex: 1, minWidth: '180px', background: 'linear-gradient(135deg, #3B82F6, #2563EB)', border: 'none', color: '#fff', fontSize: '15px', fontWeight: '700', padding: '16px 24px', borderRadius: '12px', cursor: 'pointer', letterSpacing: '-0.01em', transition: 'opacity .15s' }}
-            onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-            onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
-            ✨ Precompila domanda
+            onClick={handlePrecompila}
+            disabled={precompiling}
+            style={{
+              flex: 1, minWidth: '180px',
+              background: precompiling ? 'rgba(59,130,246,0.5)' : 'linear-gradient(135deg, #3B82F6, #2563EB)',
+              border: 'none', color: '#fff', fontSize: '15px', fontWeight: '700',
+              padding: '16px 24px', borderRadius: '12px', cursor: precompiling ? 'not-allowed' : 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+              letterSpacing: '-0.01em',
+            }}>
+            {precompiling ? (
+              <>
+                <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />
+                Avvio in corso...
+              </>
+            ) : '✨ Precompila domanda'}
           </button>
         </div>
 
