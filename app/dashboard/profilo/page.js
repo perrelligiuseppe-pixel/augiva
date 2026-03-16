@@ -123,13 +123,23 @@ export default function ProfiloPage() {
     const file = e.target.files?.[0]
     if (!file || !company) return
     setUploading(true)
-    const ext = file.name.split('.').pop()
-    const path = `${company.id}/${docType.replace(/\s+/g, '_')}_${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('company-docs').upload(path, file)
-    if (!error) {
-      const { data: files } = await supabase.storage
-        .from('company-docs').list(`${company.id}/`, { limit: 50, sortBy: { column: 'created_at', order: 'desc' } })
-      if (files) setDocs(files.filter(f => f.name !== '.emptyFolderPlaceholder'))
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('company_id', company.id)
+      fd.append('doc_type', docType)
+      const res = await fetch('/api/upload-document', { method: 'POST', body: fd })
+      const result = await res.json()
+      if (!res.ok || result.error) {
+        alert('Errore upload: ' + (result.error || 'sconosciuto'))
+      } else {
+        // Ricarica lista documenti da Storage
+        const { data: files } = await supabase.storage
+          .from('company-docs').list(`${company.id}/`, { limit: 50, sortBy: { column: 'created_at', order: 'desc' } })
+        if (files) setDocs(files.filter(f => f.name !== '.emptyFolderPlaceholder'))
+      }
+    } catch(err) {
+      alert('Errore upload: ' + err.message)
     }
     setUploading(false)
     e.target.value = ''
@@ -137,7 +147,11 @@ export default function ProfiloPage() {
 
   const handleDelete = async (name) => {
     if (!company) return
-    await supabase.storage.from('company-docs').remove([`${company.id}/${name}`])
+    await fetch('/api/upload-document', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: `${company.id}/${name}` })
+    })
     setDocs(d => d.filter(f => f.name !== name))
   }
 
