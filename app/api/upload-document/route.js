@@ -2,10 +2,10 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 const SUPABASE_URL = 'https://izwpthubencimzsgervo.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6d3B0aHViZW5jaW16c2dlcnZvIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MjcxODIzMywiZXhwIjoyMDg4Mjk0MjMzfQ.TWSDql63NZ8Nt00Ii-zT-85kBJnki8AoQJZ98oD-Ios'
 
 function getAdmin() {
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
-  return createClient(SUPABASE_URL, key)
+  return createClient(SUPABASE_URL, SUPABASE_KEY)
 }
 
 export async function POST(request) {
@@ -35,7 +35,6 @@ export async function POST(request) {
       })
 
     if (error) {
-      console.error('[upload-document] Storage error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -45,7 +44,6 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true, path, url: publicUrl })
   } catch (err) {
-    console.error('[upload-document] Error:', err)
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
@@ -55,10 +53,8 @@ export async function DELETE(request) {
     const supabaseAdmin = getAdmin()
     const { path } = await request.json()
     if (!path) return NextResponse.json({ error: 'Missing path' }, { status: 400 })
-
     const { error } = await supabaseAdmin.storage.from('company-docs').remove([path])
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
     return NextResponse.json({ success: true })
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 })
