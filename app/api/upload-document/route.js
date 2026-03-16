@@ -1,12 +1,11 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-// Client creato DENTRO le funzioni — non a livello modulo
+const SUPABASE_URL = 'https://izwpthubencimzsgervo.supabase.co'
+
 function getAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_ROLE_KEY
-  )
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
+  return createClient(SUPABASE_URL, key)
 }
 
 export async function POST(request) {
