@@ -1,13 +1,17 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-)
+// Client creato DENTRO le funzioni — non a livello modulo
+function getAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+}
 
 export async function POST(request) {
   try {
+    const supabaseAdmin = getAdmin()
     const formData = await request.formData()
     const file = formData.get('file')
     const companyId = formData.get('company_id')
@@ -49,6 +53,7 @@ export async function POST(request) {
 
 export async function DELETE(request) {
   try {
+    const supabaseAdmin = getAdmin()
     const { path } = await request.json()
     if (!path) return NextResponse.json({ error: 'Missing path' }, { status: 400 })
 
