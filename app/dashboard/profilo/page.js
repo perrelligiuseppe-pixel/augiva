@@ -4,6 +4,15 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
+
+// Carica lista documenti via API server-side (bypass RLS)
+async function fetchDocs(companyId) {
+  const res = await fetch(`/api/upload-document?company_id=${companyId}`)
+  const data = await res.json()
+  return data.files || []
+}
+
+
 const REGIONI = [
   'Abruzzo','Basilicata','Calabria','Campania','Emilia-Romagna',
   'Friuli-Venezia Giulia','Lazio','Liguria','Lombardia','Marche',
@@ -75,11 +84,9 @@ export default function ProfiloPage() {
           dipendenti: data.dipendenti || '',
           fatturato: data.fatturato || '',
         })
-        // Carica documenti
-        const { data: files } = await supabase.storage
-          .from('company-docs')
-          .list(`${data.id}/`, { limit: 50, sortBy: { column: 'created_at', order: 'desc' } })
-        if (files) setDocs(files.filter(f => f.name !== '.emptyFolderPlaceholder'))
+        // Carica documenti via API server-side
+        const files = await fetchDocs(data.id)
+        setDocs(files)
       }
     }
     load()
@@ -133,10 +140,9 @@ export default function ProfiloPage() {
       if (!res.ok || result.error) {
         alert('Errore upload: ' + (result.error || 'sconosciuto'))
       } else {
-        // Ricarica lista documenti da Storage
-        const { data: files } = await supabase.storage
-          .from('company-docs').list(`${company.id}/`, { limit: 50, sortBy: { column: 'created_at', order: 'desc' } })
-        if (files) setDocs(files.filter(f => f.name !== '.emptyFolderPlaceholder'))
+        // Ricarica lista documenti via API server-side
+        const updatedFiles = await fetchDocs(company.id)
+        setDocs(updatedFiles)
       }
     } catch(err) {
       alert('Errore upload: ' + err.message)

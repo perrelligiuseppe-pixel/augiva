@@ -8,6 +8,28 @@ function getAdmin() {
   return createClient(SUPABASE_URL, SUPABASE_KEY)
 }
 
+// GET — lista documenti di un'azienda
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const companyId = searchParams.get('company_id')
+    if (!companyId) return NextResponse.json({ error: 'Missing company_id' }, { status: 400 })
+
+    const supabaseAdmin = getAdmin()
+    const { data: files, error } = await supabaseAdmin.storage
+      .from('company-docs')
+      .list(`${companyId}/`, { limit: 50, sortBy: { column: 'created_at', order: 'desc' } })
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    const result = (files || []).filter(f => f.name !== '.emptyFolderPlaceholder')
+    return NextResponse.json({ files: result })
+  } catch (err) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}
+
+// POST — upload documento
 export async function POST(request) {
   try {
     const supabaseAdmin = getAdmin()
@@ -34,20 +56,16 @@ export async function POST(request) {
         upsert: false
       })
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    const publicUrl = supabaseAdmin.storage
-      .from('company-docs')
-      .getPublicUrl(path).data.publicUrl
-
+    const publicUrl = supabaseAdmin.storage.from('company-docs').getPublicUrl(path).data.publicUrl
     return NextResponse.json({ success: true, path, url: publicUrl })
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
 
+// DELETE — elimina documento
 export async function DELETE(request) {
   try {
     const supabaseAdmin = getAdmin()
