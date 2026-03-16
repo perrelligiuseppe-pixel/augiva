@@ -31,7 +31,9 @@ export async function POST(request) {
 
     if (existing) {
       const ageHours = (Date.now() - new Date(existing.created_at).getTime()) / 3600000
-      if (ageHours < 24 || existing.status === 'complete') {
+      // Riusa solo se il job è recente (<24h) e NON è ancora completo
+      // Se è complete, crea sempre un nuovo job (l'utente vuole rigenerare)
+      if (ageHours < 24 && existing.status !== 'complete') {
         return NextResponse.json({ job_id: existing.id, status: existing.status, existing: true })
       }
     }

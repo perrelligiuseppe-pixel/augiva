@@ -59,6 +59,21 @@ export async function POST(request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     const publicUrl = supabaseAdmin.storage.from('company-docs').getPublicUrl(path).data.publicUrl
+
+    // Aggiorna documenti_ids nella tabella companies
+    const { data: company } = await supabaseAdmin
+      .from('companies')
+      .select('documenti_ids')
+      .eq('id', companyId)
+      .single()
+    const currentIds = company?.documenti_ids || []
+    if (!currentIds.includes(path)) {
+      await supabaseAdmin
+        .from('companies')
+        .update({ documenti_ids: [...currentIds, path] })
+        .eq('id', companyId)
+    }
+
     return NextResponse.json({ success: true, path, url: publicUrl })
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 })
