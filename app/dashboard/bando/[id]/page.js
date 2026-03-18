@@ -73,6 +73,11 @@ export default function BandoPage() {
 
   const handlePrecompila = async () => {
     if (!match || !session || precompiling) return
+    // Guard: bando scaduto
+    if (days !== null && days <= 0) {
+      alert('Questo bando è scaduto e non è più possibile precompilare documenti.')
+      return
+    }
     // Gate: controlla se il profilo è sufficientemente completo
     const hasDocs = company?.documenti_ids && company.documenti_ids.length > 0
     if (!hasDocs) { setShowGate(true); return }
@@ -168,6 +173,13 @@ export default function BandoPage() {
 
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '28px 20px 60px' }}>
 
+        {/* Bando scaduto */}
+        {days !== null && days <= 0 && (
+          <div style={{ background: 'rgba(255,69,58,.1)', border: '1px solid rgba(255,69,58,.25)', borderRadius: '10px', padding: '10px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#FF453A', fontWeight: '600' }}>
+            ⛔ Questo bando è scaduto — non è più possibile partecipare né precompilare documenti.
+          </div>
+        )}
+
         {/* Deadline urgente */}
         {days !== null && days > 0 && days <= 20 && (
           <div style={{ background: 'rgba(255,159,10,.1)', border: '1px solid rgba(255,159,10,.25)', borderRadius: '10px', padding: '10px 16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#FF9F0A', fontWeight: '600' }}>
@@ -219,10 +231,16 @@ export default function BandoPage() {
               </div>
             ))}
 
-            <button onClick={handlePrecompila} disabled={precompiling}
-              style={{ width: '100%', padding: '13px', background: precompiling ? 'rgba(59,130,246,0.5)' : 'linear-gradient(135deg, #3B82F6, #2563EB)', border: 'none', borderRadius: '11px', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: precompiling ? 'not-allowed' : 'pointer', marginTop: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', fontFamily: 'inherit', letterSpacing: '-0.2px' }}>
-              {precompiling ? (<><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />Avvio...</>) : '⚡ Precompila documenti'}
-            </button>
+            {days !== null && days <= 0 ? (
+              <div style={{ width: '100%', padding: '13px', background: 'rgba(255,69,58,0.12)', border: '1px solid rgba(255,69,58,0.3)', borderRadius: '11px', color: '#FF453A', fontSize: '13px', fontWeight: '700', marginTop: '14px', textAlign: 'center' }}>
+                ⛔ Bando scaduto
+              </div>
+            ) : (
+              <button onClick={handlePrecompila} disabled={precompiling}
+                style={{ width: '100%', padding: '13px', background: precompiling ? 'rgba(59,130,246,0.5)' : 'linear-gradient(135deg, #3B82F6, #2563EB)', border: 'none', borderRadius: '11px', color: '#fff', fontSize: '14px', fontWeight: '700', cursor: precompiling ? 'not-allowed' : 'pointer', marginTop: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px', fontFamily: 'inherit', letterSpacing: '-0.2px' }}>
+                {precompiling ? (<><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin .8s linear infinite' }} />Avvio...</>) : '⚡ Precompila documenti'}
+              </button>
+            )}
 
             {link && (
               <a href={link} target="_blank" rel="noopener noreferrer"
