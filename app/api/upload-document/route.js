@@ -60,19 +60,20 @@ export async function POST(request) {
 
     const publicUrl = supabaseAdmin.storage.from('company-docs').getPublicUrl(path).data.publicUrl
 
-    // Aggiorna documenti_ids nella tabella companies
+    // Aggiorna documenti_ids + segna needs_profiling=true
     const { data: company } = await supabaseAdmin
       .from('companies')
       .select('documenti_ids')
       .eq('id', companyId)
       .single()
     const currentIds = company?.documenti_ids || []
-    if (!currentIds.includes(path)) {
-      await supabaseAdmin
-        .from('companies')
-        .update({ documenti_ids: [...currentIds, path] })
-        .eq('id', companyId)
-    }
+    await supabaseAdmin
+      .from('companies')
+      .update({
+        documenti_ids: currentIds.includes(path) ? currentIds : [...currentIds, path],
+        needs_profiling: true   // ← trigger re-profiling automatico
+      })
+      .eq('id', companyId)
 
     return NextResponse.json({ success: true, path, url: publicUrl })
   } catch (err) {
@@ -84,10 +85,17 @@ export async function POST(request) {
 export async function DELETE(request) {
   try {
     const supabaseAdmin = getAdmin()
-    const { path } = await request.json()
+    const { searchParams } = new URL(request.url)
+    const path = searchParams.get('path') || (await request.json().catch(() => ({}))).path
     if (!path) return NextResponse.json({ error: 'Missing path' }, { status: 400 })
     const { error } = await supabaseAdmin.storage.from('company-docs').remove([path])
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    // Dopo eliminazione documento, ri-profila per aggiornare activities_text
+    const { searchParams: sp } = new URL(request.url)
+    const companyId = sp.get('company_id')
+    if (companyId) {
+      await supabaseAdmin.from('companies').update({ needs_profiling: true }).eq('id', companyId)
+    }
     return NextResponse.json({ success: true })
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 })

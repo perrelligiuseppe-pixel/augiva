@@ -121,6 +121,7 @@ export default function ProfiloPage() {
       luogo_nascita_lr: form.luogo_nascita_lr,
       dipendenti: form.dipendenti,
       fatturato: form.fatturato,
+      needs_profiling: true,   // trigger re-profiling automatico
     }).eq('id', company.id)
     setSaving(false)
     if (!error) { setSaved(true); setTimeout(() => setSaved(false), 2500) }
