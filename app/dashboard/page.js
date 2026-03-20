@@ -69,11 +69,12 @@ export default function DashboardPage() {
     const { data } = await supabase
       .from('matches').select('*, tenders(*)')
       .eq('company_id', companyId)
+      .neq('tenders.status', 'expired')
       .order('score', { ascending: false })
 
     if (!data) return
 
-    const mapped = data.filter(m => m.tenders).map(m => ({
+    const mapped = data.filter(m => m.tenders && m.tenders.status !== 'expired').map(m => ({
       id: m.id,
       titolo: m.tenders.titolo || m.tenders.title || 'Opportunità',
       ente: m.tenders.ente || m.tenders.contracting_body || '',
